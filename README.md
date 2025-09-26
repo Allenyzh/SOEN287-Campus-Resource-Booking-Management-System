@@ -1,5 +1,9 @@
 # SOEN287 Campus Resource Booking Management System
 
+## 代码协作
+
+- 每个提交需要新建 Branch，并创建 Pull Request，这样可以看到每个人做的内容，同时可以有效的处理代码冲突
+
 ---
 
 ## 功能特点
