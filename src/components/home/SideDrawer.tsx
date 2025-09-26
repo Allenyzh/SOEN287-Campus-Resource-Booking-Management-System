@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -23,14 +22,14 @@ export default function SideDrawer({ navItems }: SideDrawerProps) {
       <SheetTrigger className="lg:hidden">
         <Menu className="w-5 h-5" />
       </SheetTrigger>
-      <SheetContent side="right" className="flex flex-col">
-        <SheetHeader className="pb-0">
-          <SheetTitle>Navigation</SheetTitle>
-          <SheetDescription>
-            Quick links to campus resource tools and support.
-          </SheetDescription>
+      <SheetContent
+        side="right"
+        className="flex flex-col min-h-[100dvh] justify-center items-center"
+      >
+        <SheetHeader className="p-0 h-0">
+          <SheetTitle></SheetTitle>
         </SheetHeader>
-        <nav className="px-4 flex flex-col">
+        <nav className="px-4 flex flex-col min-h-1/3 justify-around">
           {navItems.map((item) => (
             <SheetClose asChild key={item.href}>
               <Link
