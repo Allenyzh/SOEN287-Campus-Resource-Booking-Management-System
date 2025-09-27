@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import type { NavItem } from "@/components/home/nav";
 import { Menu, MoveRight } from "lucide-react";
+import ThemeButton from "@/components/home/ThemeButton";
 
 interface SideDrawerProps {
   navItems: NavItem[];
@@ -19,7 +20,7 @@ interface SideDrawerProps {
 export default function SideDrawer({ navItems }: SideDrawerProps) {
   return (
     <Sheet>
-      <SheetTrigger className="lg:hidden">
+      <SheetTrigger className="xl:hidden">
         <Menu className="w-5 h-5" />
       </SheetTrigger>
       <SheetContent
@@ -34,7 +35,7 @@ export default function SideDrawer({ navItems }: SideDrawerProps) {
             <SheetClose asChild key={item.href}>
               <Link
                 href={item.href}
-                className="group text-foreground hover:text-primary hover:bg-gray-100 active:text-primary rounded-md py-2 transition-colors flex items-center gap-2 pr-8 pl-4"
+                className="group text-foreground hover:text-primary hover:bg-gray-100 active:text-primary dark:hover:text-black rounded-md py-2 transition-colors flex items-center gap-2 pr-8 pl-4"
               >
                 <span className="flex-1">{item.label}</span>
                 <MoveRight className="w-4 h-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-active:translate-x-1 " />
@@ -42,6 +43,7 @@ export default function SideDrawer({ navItems }: SideDrawerProps) {
             </SheetClose>
           ))}
         </nav>
+        <ThemeButton />
       </SheetContent>
     </Sheet>
   );
