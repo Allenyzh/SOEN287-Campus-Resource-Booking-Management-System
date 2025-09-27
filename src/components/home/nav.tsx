@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import SideDrawer from "@/components/home/SideDrawer";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import ThemeButton from "./ThemeButton";
 
 export interface NavItem {
   label: string;
@@ -23,11 +24,7 @@ const navItems: NavItem[] = [
   },
   {
     label: "My Bookings",
-    href: "/my-bookings",
-  },
-  {
-    label: "Help",
-    href: "/help",
+    href: "/mybookings",
   },
 ];
 
@@ -57,14 +54,15 @@ export default function Nav() {
               </p>
             </div>
           </div>
-          <nav className="hidden lg:flex items-center space-x-6">
+          <nav className="hidden xl:flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "text-foreground hover:text-primary transition-colors hover:bg-gray-100 py-2 px-4 rounded-md",
-                  item.label === activeLink && "bg-gray-100 font-bold"
+                  "text-foreground hover:text-primary hover:dark:text-black transition-colors hover:bg-gray-200 active:dark:text-black py-2 px-4 rounded-md",
+                  item.label === activeLink &&
+                    "bg-gray-200 font-bold dark:text-black "
                 )}
               >
                 {item.label}
@@ -76,6 +74,9 @@ export default function Nav() {
               Sign In
             </Button>
             <Button size="sm">Get Started</Button>
+            <div className="hidden xl:block">
+              <ThemeButton />
+            </div>
             <SideDrawer navItems={navItems} />
           </div>
         </div>
