@@ -10,6 +10,26 @@ import { useTheme } from "next-themes";
 
 export default function ThemeButton() {
   const { setTheme } = useTheme();
+  const config = [
+    {
+      label: "Light Mode",
+      icon: Sun,
+      value: "light",
+      className: "hidden dark:block !rounded-none",
+    },
+    {
+      label: "Dark Mode",
+      icon: Moon,
+      value: "dark",
+      className: "dark:hidden !rounded-none",
+    },
+    {
+      label: "System Mode",
+      icon: MonitorCog,
+      value: "system",
+      className: "!rounded-none",
+    },
+  ];
   return (
     <ToggleGroup
       type="single"
@@ -17,47 +37,21 @@ export default function ThemeButton() {
       aria-label="Theme Switcher"
       tabIndex={-1}
     >
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <ToggleGroupItem
-            value="light"
-            aria-label="Light mode switcher"
-            onClick={() => setTheme("light")}
-            className="hidden dark:block !rounded-none"
-          >
-            <Sun className="w-4 h-4" />
-          </ToggleGroupItem>
-        </TooltipTrigger>
-        <TooltipContent>Light Mode</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <ToggleGroupItem
-            value="light"
-            aria-label="Light mode switcher"
-            onClick={() => setTheme("dark")}
-            className="dark:hidden !rounded-none"
-          >
-            <Moon className="w-4 h-4" />
-          </ToggleGroupItem>
-        </TooltipTrigger>
-        <TooltipContent>Dark Mode</TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <ToggleGroupItem
-            value="light"
-            aria-label="Light mode switcher"
-            onClick={() => setTheme("system")}
-            className="!rounded-none"
-          >
-            <MonitorCog className="w-4 h-4" />
-          </ToggleGroupItem>
-        </TooltipTrigger>
-        <TooltipContent>System</TooltipContent>
-      </Tooltip>
+      {config.map((option, idx) => (
+        <Tooltip key={idx}>
+          <TooltipTrigger asChild>
+            <ToggleGroupItem
+              value={option.value}
+              aria-label={option.label + " switcher"}
+              onClick={() => setTheme(option.value)}
+              className={option.className}
+            >
+              <option.icon className="w-4 h-4" />
+            </ToggleGroupItem>
+          </TooltipTrigger>
+          <TooltipContent>{option.label}</TooltipContent>
+        </Tooltip>
+      ))}
     </ToggleGroup>
   );
 }
