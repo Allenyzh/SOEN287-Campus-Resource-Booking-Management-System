@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# cloudflare
+.wrangler/
+build/
+pnpm-workspace.yaml
+
+.open-next
+open-next.config.ts
+wrangler.jsonc
