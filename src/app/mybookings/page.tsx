@@ -21,6 +21,12 @@ export default function page() {
       bookingDate: "2024-07-10",
       status: "Cancelled",
     },
+    {
+      id: 4,
+      resourceName: "Resource 4",
+      bookingDate: "2024-07-15",
+      status: "Confirmed",
+    },
   ];
 
   return (
