@@ -1,6 +1,6 @@
 # SOEN287 Campus Resource Booking Management System
 
-[中文]()
+[中文](./docs/README.zh.md)
 
 ---
 
