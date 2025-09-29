@@ -69,7 +69,7 @@
 1. **克隆仓库（或解压 ZIP）**
 
    - 如果安装了 github desktop，点击
-     ![alt text](image.png)
+     ![alt text](./docs/image.png)
 
 2. **安装依赖**
 
