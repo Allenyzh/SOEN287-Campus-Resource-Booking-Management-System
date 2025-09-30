@@ -1,3 +1,5 @@
+"use client";
+
 import { columns, BookingColumn } from "./columns";
 import { DataTable } from "./DataTable";
 

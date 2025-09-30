@@ -1,3 +1,5 @@
+"use client";
+
 export default function page() {
   const resources = [
     { id: 1, name: "Resource 1", description: "Description of Resource 1" },
