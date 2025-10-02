@@ -55,6 +55,7 @@ export default function DisplayCard({
             <p className="text-sm text-muted-foreground">{description}</p>
           </CardContent>
         </Card>
+        // 1
       );
     default:
       return null;
