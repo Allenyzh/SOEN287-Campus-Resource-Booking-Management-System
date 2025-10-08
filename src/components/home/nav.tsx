@@ -73,7 +73,9 @@ export default function Nav() {
             <Button variant="outline" size="sm">
               Sign In
             </Button>
-            <Button size="sm">Get Started</Button>
+            <Button size="sm" asChild>
+              <Link href="/create-account">Get Started</Link>
+            </Button>
             <div className="hidden xl:block">
               <ThemeButton />
             </div>
