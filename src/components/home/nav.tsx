@@ -71,7 +71,7 @@ export default function Nav() {
           </nav>
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              Sign In
+              <Link href="/sign-in">Sign In</Link>
             </Button>
             <Button size="sm" asChild>
               <Link href="/create-account">Get Started</Link>
