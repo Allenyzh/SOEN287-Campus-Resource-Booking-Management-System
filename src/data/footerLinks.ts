@@ -22,11 +22,6 @@ export const footerSections: FooterLinkSection[] = [
     links: [
       { href: "/underconstruction", label: "Admin Dashboard" },
       { href: "/underconstruction", label: "Manage Resources" },
-      { href: "/underconstruction", label: "Usage Reports" },
     ],
-  },
-  {
-    title: "Support",
-    links: [{ href: "/help", label: "Help Center" }],
   },
 ];

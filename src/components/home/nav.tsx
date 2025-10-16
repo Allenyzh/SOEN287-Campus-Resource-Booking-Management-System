@@ -23,8 +23,8 @@ const navItems: NavItem[] = [
     href: "/browse",
   },
   {
-    label: "My Bookings",
-    href: "/mybookings",
+    label: "Dashboard",
+    href: "/dashboard",
   },
 ];
 
