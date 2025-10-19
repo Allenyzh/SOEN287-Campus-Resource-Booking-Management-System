@@ -47,7 +47,7 @@ export function BookingDialog({
     "18:00 - 20:00",
   ];
 
-  // 获取今天的日期，用于设置最小日期
+  // Get today's date for setting minimum date in date picker
   const today = new Date().toISOString().split("T")[0];
 
   return (

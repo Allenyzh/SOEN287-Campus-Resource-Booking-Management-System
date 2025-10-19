@@ -6,7 +6,7 @@ import { useBookingStore } from "@/stores/bookingStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
-import { LayoutGrid, Calendar } from "lucide-react";
+import { LayoutGrid, Calendar, BarChart3 } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -54,6 +54,10 @@ export default function AdminDashboardPage() {
     router.push("/admin/bookings");
   };
 
+  const navigateToReports = () => {
+    router.push("/admin/reports");
+  };
+
   return (
     <div className="flex-1">
       {/* Header */}
@@ -88,7 +92,7 @@ export default function AdminDashboardPage() {
         <DashboardStats {...stats} />
 
         {/* Quick Actions Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* Resource Management Card */}
           <Card 
             className="hover:shadow-lg transition-shadow cursor-pointer" 
@@ -120,6 +124,24 @@ export default function AdminDashboardPage() {
                 <div>
                   <h3 className="text-lg font-semibold">Booking Management</h3>
                   <p className="text-gray-600">Review and approve bookings</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Reports & Analytics Card */}
+          <Card 
+            className="hover:shadow-lg transition-shadow cursor-pointer" 
+            onClick={navigateToReports}
+          >
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-purple-100 rounded-lg">
+                  <BarChart3 className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">Reports & Analytics</h3>
+                  <p className="text-gray-600">View usage statistics and trends</p>
                 </div>
               </div>
             </CardContent>
