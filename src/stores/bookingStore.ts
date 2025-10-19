@@ -25,14 +25,20 @@ export interface Booking {
 interface BookingStore {
   resources: Resource[];
   bookings: Booking[];
+  // User booking functions
   addBooking: (booking: Omit<Booking, "id">) => void;
   cancelBooking: (id: number) => void;
   updateBookingStatus: (id: number, status: Booking["status"]) => void;
   getBookingsByResource: (resourceId: number) => Booking[];
   getUserBookings: (userName: string) => Booking[];
+  // Admin resource management functions
+  addResource: (resource: Omit<Resource, "id">) => void;
+  updateResource: (resource: Resource) => void;
+  deleteResource: (id: number) => void;
+  toggleResourceAvailability: (id: number) => void;
 }
 
-// 模拟资源数据
+// Mock resource data
 const mockResources: Resource[] = [
   {
     id: 1,
@@ -108,7 +114,7 @@ const mockResources: Resource[] = [
   },
 ];
 
-// 模拟初始预订数据
+// Mock initial booking data
 const mockBookings: Booking[] = [
   {
     id: 1,
@@ -136,6 +142,7 @@ export const useBookingStore = create<BookingStore>()(
       resources: mockResources,
       bookings: mockBookings,
 
+      // User booking functions
       addBooking: (booking) => {
         const newBooking: Booking = {
           ...booking,
@@ -174,6 +181,42 @@ export const useBookingStore = create<BookingStore>()(
         return get().bookings.filter(
           (booking) => booking.userName === userName
         );
+      },
+
+      // Admin resource management functions
+      addResource: (resource) => {
+        const newResource: Resource = {
+          ...resource,
+          id: Date.now(),
+          available: true,
+        };
+        set((state) => ({
+          resources: [...state.resources, newResource],
+        }));
+      },
+
+      updateResource: (updatedResource) => {
+        set((state) => ({
+          resources: state.resources.map((resource) =>
+            resource.id === updatedResource.id ? updatedResource : resource
+          ),
+        }));
+      },
+
+      deleteResource: (id) => {
+        set((state) => ({
+          resources: state.resources.filter((resource) => resource.id !== id),
+        }));
+      },
+
+      toggleResourceAvailability: (id) => {
+        set((state) => ({
+          resources: state.resources.map((resource) =>
+            resource.id === id
+              ? { ...resource, available: !resource.available }
+              : resource
+          ),
+        }));
       },
     }),
     {
