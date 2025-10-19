@@ -14,24 +14,51 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useBookingStore, Resource } from "@/stores/bookingStore";
-import { Edit, Trash2, Plus, ArrowLeft } from "lucide-react";
+import { Edit, Trash2, Plus, ArrowLeft, Clock, Calendar } from "lucide-react";
+import { ResourceFormDialog } from "@/components/admin/ResourceFormDialog";
+import { WorkingHoursDialog } from "@/components/admin/WorkingHoursDialog";
+import { ExceptionsDialog } from "@/components/admin/ExceptionsDialog";
 
 export default function ResourceManagementPage() {
   const router = useRouter();
-  const { resources, deleteResource, toggleResourceAvailability } = useBookingStore();
+  const { 
+    resources, 
+    deleteResource, 
+    toggleResourceAvailability, 
+    addResource, 
+    updateResource,
+    availabilityRules,
+    getAvailabilityRulesByResource,
+    addAvailabilityRule,
+    updateAvailabilityRule,
+    deleteAvailabilityRule,
+    availabilityExceptions,
+    getAvailabilityExceptionsByResource,
+    addAvailabilityException,
+    updateAvailabilityException,
+    deleteAvailabilityException,
+  } = useBookingStore();
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
+  const [isWorkingHoursDialogOpen, setIsWorkingHoursDialogOpen] = useState(false);
+  const [isExceptionsDialogOpen, setIsExceptionsDialogOpen] = useState(false);
+  const [scheduleResourceId, setScheduleResourceId] = useState<number | null>(null);
 
   const handleBack = () => {
     router.push("/admin");
   };
 
   const handleAddResource = () => {
-    alert("Add resource functionality - to be implemented");
+    setDialogMode("create");
+    setSelectedResource(null);
+    setIsDialogOpen(true);
   };
 
   const handleEditResource = (resource: Resource) => {
+    setDialogMode("edit");
     setSelectedResource(resource);
-    alert(`Edit resource functionality for ${resource.name} - to be implemented`);
+    setIsDialogOpen(true);
   };
 
   const handleDeleteResource = (resource: Resource) => {
@@ -42,6 +69,34 @@ export default function ResourceManagementPage() {
 
   const handleToggleAvailability = (resource: Resource) => {
     toggleResourceAvailability(resource.id);
+  };
+
+  const handleConfirmResource = (resourceData: Omit<Resource, "id" | "available">) => {
+    if (dialogMode === "create") {
+      // When creating, add the available property (default to true)
+      addResource({
+        ...resourceData,
+        available: true,
+      });
+    } else if (selectedResource) {
+      updateResource({
+        ...resourceData,
+        id: selectedResource.id,
+        available: selectedResource.available,
+      });
+    }
+    setIsDialogOpen(false);
+    setSelectedResource(null);
+  };
+
+  const handleSetWorkingHours = (resourceId: number) => {
+    setScheduleResourceId(resourceId);
+    setIsWorkingHoursDialogOpen(true);
+  };
+
+  const handleSetExceptions = (resourceId: number) => {
+    setScheduleResourceId(resourceId);
+    setIsExceptionsDialogOpen(true);
   };
 
   return (
@@ -88,6 +143,7 @@ export default function ResourceManagementPage() {
                       <TableHead>Location</TableHead>
                       <TableHead>Capacity</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Schedule</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -107,6 +163,28 @@ export default function ResourceManagementPage() {
                           >
                             {resource.available ? "Available" : "Unavailable"}
                           </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleSetWorkingHours(resource.id)}
+                              title="Set working hours"
+                            >
+                              <Clock className="w-4 h-4 mr-1" />
+                              Hours
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleSetExceptions(resource.id)}
+                              title="Set exceptions and blackout dates"
+                            >
+                              <Calendar className="w-4 h-4 mr-1" />
+                              Exceptions
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
@@ -154,6 +232,81 @@ export default function ResourceManagementPage() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Resource Form Dialog */}
+      <ResourceFormDialog
+        resource={dialogMode === "edit" ? selectedResource : null}
+        open={isDialogOpen}
+        onClose={() => {
+          setIsDialogOpen(false);
+          setSelectedResource(null);
+        }}
+        onConfirm={handleConfirmResource}
+      />
+
+      {/* Working Hours Dialog */}
+      {scheduleResourceId !== null && (
+        <WorkingHoursDialog
+          resource={resources.find(r => r.id === scheduleResourceId) || null}
+          open={isWorkingHoursDialogOpen}
+          onClose={() => {
+            setIsWorkingHoursDialogOpen(false);
+            setScheduleResourceId(null);
+          }}
+          existingRules={getAvailabilityRulesByResource(scheduleResourceId)}
+          onSave={(rules, deletedIds) => {
+            // Delete removed rules
+            deletedIds.forEach((id) => {
+              deleteAvailabilityRule(id);
+            });
+            
+            // Add or update rules
+            rules.forEach((rule) => {
+              // Check if this is a new rule (temporary ID from Date.now()) or existing
+              const existingRule = availabilityRules.find(r => r.id === rule.id);
+              if (existingRule) {
+                updateAvailabilityRule(rule);
+              } else {
+                // New rule - remove temporary ID and let store assign real one
+                const { id: _id, ...ruleData } = rule;
+                addAvailabilityRule(ruleData);
+              }
+            });
+          }}
+        />
+      )}
+
+      {/* Exceptions Dialog */}
+      {scheduleResourceId !== null && (
+        <ExceptionsDialog
+          resource={resources.find(r => r.id === scheduleResourceId) || null}
+          open={isExceptionsDialogOpen}
+          onClose={() => {
+            setIsExceptionsDialogOpen(false);
+            setScheduleResourceId(null);
+          }}
+          existingExceptions={getAvailabilityExceptionsByResource(scheduleResourceId)}
+          onSave={(exceptions, deletedIds) => {
+            // Delete removed exceptions
+            deletedIds.forEach((id) => {
+              deleteAvailabilityException(id);
+            });
+            
+            // Add or update exceptions
+            exceptions.forEach((exception) => {
+              // Check if this is a new exception (temporary ID from Date.now()) or existing
+              const existingException = availabilityExceptions.find(e => e.id === exception.id);
+              if (existingException) {
+                updateAvailabilityException(exception);
+              } else {
+                // New exception - remove temporary ID and let store assign real one
+                const { id: _id, ...exceptionData } = exception;
+                addAvailabilityException(exceptionData);
+              }
+            });
+          }}
+        />
+      )}
     </div>
   );
 }

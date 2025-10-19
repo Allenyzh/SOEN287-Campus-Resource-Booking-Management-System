@@ -20,12 +20,12 @@ export default function DashboardPage() {
   const router = useRouter();
   const { bookings, cancelBooking } = useBookingStore();
 
-  // 过滤当前用户的预订
+  // Filter bookings for current user
   const userBookings = useMemo(() => {
     return bookings.filter((b) => b.userName === "Student");
   }, [bookings]);
 
-  // 计算统计数据
+  // Calculate statistics
   const stats = useMemo(() => {
     const total = userBookings.length;
     const confirmed = userBookings.filter(
@@ -40,7 +40,7 @@ export default function DashboardPage() {
   }, [userBookings]);
 
   const handleLogout = () => {
-    // 实现登出逻辑
+    // TODO: Implement logout logic with authentication
     router.push("/");
   };
 

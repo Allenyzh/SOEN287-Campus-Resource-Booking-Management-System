@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter } from "lucide-react";
 
 export default function BrowseResourcesPage() {
-  const router = useRouter();
+  const _router = useRouter(); // Reserved for future navigation
   const { resources, addBooking } = useBookingStore();
 
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
@@ -21,13 +21,13 @@ export default function BrowseResourcesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
-  // 获取所有类别
+  // Get all unique categories from resources
   const categories = useMemo(() => {
     const cats = new Set(resources.map((r) => r.category));
     return ["All", ...Array.from(cats)];
   }, [resources]);
 
-  // 过滤资源
+  // Filter resources based on search and category
   const filteredResources = useMemo(() => {
     return resources.filter((resource) => {
       const matchesSearch =
@@ -58,10 +58,10 @@ export default function BrowseResourcesPage() {
       date: bookingDetails.date,
       time: bookingDetails.time,
       status: "Pending",
-      userName: "Student", // 在实际应用中，这应该来自用户认证
+      userName: "Student", // In production, this should come from user authentication
     });
 
-    // 可以添加 toast 通知
+    // TODO: Add toast notification for better UX
     alert(
       `Successfully booked ${selectedResource.name} for ${bookingDetails.date} at ${bookingDetails.time}`
     );
