@@ -27,9 +27,12 @@ export default function Hero() {
             variant="outline"
             size="lg"
             className="text-lg px-8 py-6 bg-transparent"
+            asChild
           >
-            <Users className="w-5 h-5 mr-2" />
-            Admin Dashboard
+            <a href="/admin">
+              <Users className="w-5 h-5 mr-2" />
+              Admin Dashboard
+            </a>
           </Button>
         </div>
       </div>
