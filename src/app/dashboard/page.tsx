@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useBookingStore } from "@/stores/bookingStore";
+import { useBookingStore, Booking } from "@/stores/bookingStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,10 +15,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
+import { EditBookingDialog } from "@/components/dashboard/EditBookingDialog";
+import { Edit } from "lucide-react";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { bookings, cancelBooking } = useBookingStore();
+  const { bookings, cancelBooking, updateBooking } = useBookingStore();
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Filter bookings for current user
   const userBookings = useMemo(() => {
@@ -48,6 +52,20 @@ export default function DashboardPage() {
     if (confirm("Are you sure you want to cancel this booking?")) {
       cancelBooking(id);
     }
+  };
+
+  const handleEditBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleConfirmEdit = (bookingId: number, updates: { date: string; time: string }) => {
+    updateBooking(bookingId, updates);
+    setIsEditDialogOpen(false);
+    setSelectedBooking(null);
+    
+    // Show success message
+    alert(`Booking updated successfully!\nNew date: ${updates.date}\nNew time: ${updates.time}`);
   };
 
   const handleBookNewResource = () => {
@@ -115,7 +133,7 @@ export default function DashboardPage() {
                       <TableHead>Date</TableHead>
                       <TableHead>Time</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Action</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -128,15 +146,28 @@ export default function DashboardPage() {
                         <TableCell>{booking.time}</TableCell>
                         <TableCell>{getStatusBadge(booking.status)}</TableCell>
                         <TableCell>
-                          <Button
-                            onClick={() => handleCancelBooking(booking.id)}
-                            variant="outline"
-                            size="sm"
-                            disabled={booking.status === "Cancelled"}
-                            className="bg-[#e67e22] text-white hover:bg-[#d35400] hover:text-white disabled:opacity-50"
-                          >
-                            Cancel
-                          </Button>
+                          <div className="flex space-x-2">
+                            <Button
+                              onClick={() => handleEditBooking(booking)}
+                              variant="outline"
+                              size="sm"
+                              disabled={booking.status === "Cancelled"}
+                              className="bg-[#3498db] text-white hover:bg-[#2980b9] hover:text-white disabled:opacity-50"
+                              title="Edit booking"
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              onClick={() => handleCancelBooking(booking.id)}
+                              variant="outline"
+                              size="sm"
+                              disabled={booking.status === "Cancelled"}
+                              className="bg-[#e67e22] text-white hover:bg-[#d35400] hover:text-white disabled:opacity-50"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -168,6 +199,17 @@ export default function DashboardPage() {
           </Button>
         </div>
       </main>
+
+      {/* Edit Booking Dialog */}
+      <EditBookingDialog
+        booking={selectedBooking}
+        open={isEditDialogOpen}
+        onClose={() => {
+          setIsEditDialogOpen(false);
+          setSelectedBooking(null);
+        }}
+        onConfirm={handleConfirmEdit}
+      />
     </div>
   );
 }
