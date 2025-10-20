@@ -86,7 +86,7 @@ export default function DashboardPage() {
             <CardTitle className="text-3xl">Welcome, Student!</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Here you can view and manage your resource bookings.
             </p>
           </CardContent>
