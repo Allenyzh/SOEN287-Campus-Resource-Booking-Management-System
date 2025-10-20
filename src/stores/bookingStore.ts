@@ -48,6 +48,7 @@ interface BookingStore {
   
   // User booking functions
   addBooking: (booking: Omit<Booking, "id">) => void;
+  updateBooking: (id: number, updates: { date: string; time: string }) => void;
   cancelBooking: (id: number) => void;
   updateBookingStatus: (id: number, status: Booking["status"]) => void;
   getBookingsByResource: (resourceId: number) => Booking[];
@@ -356,6 +357,16 @@ export const useBookingStore = create<BookingStore>()(
         };
         set((state) => ({
           bookings: [...state.bookings, newBooking],
+        }));
+      },
+
+      updateBooking: (id, updates) => {
+        set((state) => ({
+          bookings: state.bookings.map((booking) =>
+            booking.id === id
+              ? { ...booking, date: updates.date, time: updates.time }
+              : booking
+          ),
         }));
       },
 
