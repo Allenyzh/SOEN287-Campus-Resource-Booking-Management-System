@@ -21,11 +21,11 @@ import { ExceptionsDialog } from "@/components/admin/ExceptionsDialog";
 
 export default function ResourceManagementPage() {
   const router = useRouter();
-  const { 
-    resources, 
-    deleteResource, 
-    toggleResourceAvailability, 
-    addResource, 
+  const {
+    resources,
+    deleteResource,
+    toggleResourceAvailability,
+    addResource,
     updateResource,
     availabilityRules,
     getAvailabilityRulesByResource,
@@ -38,12 +38,17 @@ export default function ResourceManagementPage() {
     updateAvailabilityException,
     deleteAvailabilityException,
   } = useBookingStore();
-  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+    null
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
-  const [isWorkingHoursDialogOpen, setIsWorkingHoursDialogOpen] = useState(false);
+  const [isWorkingHoursDialogOpen, setIsWorkingHoursDialogOpen] =
+    useState(false);
   const [isExceptionsDialogOpen, setIsExceptionsDialogOpen] = useState(false);
-  const [scheduleResourceId, setScheduleResourceId] = useState<number | null>(null);
+  const [scheduleResourceId, setScheduleResourceId] = useState<number | null>(
+    null
+  );
 
   const handleBack = () => {
     router.push("/admin");
@@ -71,7 +76,9 @@ export default function ResourceManagementPage() {
     toggleResourceAvailability(resource.id);
   };
 
-  const handleConfirmResource = (resourceData: Omit<Resource, "id" | "available">) => {
+  const handleConfirmResource = (
+    resourceData: Omit<Resource, "id" | "available">
+  ) => {
     if (dialogMode === "create") {
       // When creating, add the available property (default to true)
       addResource({
@@ -105,11 +112,7 @@ export default function ResourceManagementPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              size="sm"
-            >
+            <Button variant="outline" onClick={handleBack} size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
@@ -117,7 +120,7 @@ export default function ResourceManagementPage() {
           </div>
           <Button
             onClick={handleAddResource}
-            className="bg-[#004080] hover:bg-[#003060]"
+            className="bg-[#004080] hover:bg-[#003060] dark:bg-accent-foreground dark:hover:bg-foreground/70"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add New Resource
@@ -126,7 +129,7 @@ export default function ResourceManagementPage() {
       </div>
 
       {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-2 py-8">
         {/* Resources Table */}
         <Card>
           <CardHeader>
@@ -158,8 +161,14 @@ export default function ResourceManagementPage() {
                         <TableCell>{resource.capacity}</TableCell>
                         <TableCell>
                           <Badge
-                            variant={resource.available ? "default" : "secondary"}
-                            className={resource.available ? "bg-green-600" : "bg-gray-600"}
+                            variant={
+                              resource.available ? "default" : "secondary"
+                            }
+                            className={
+                              resource.available
+                                ? "bg-green-600"
+                                : "bg-gray-600"
+                            }
                           >
                             {resource.available ? "Available" : "Unavailable"}
                           </Badge>
@@ -192,7 +201,11 @@ export default function ResourceManagementPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleToggleAvailability(resource)}
-                              title={resource.available ? "Mark as unavailable" : "Mark as available"}
+                              title={
+                                resource.available
+                                  ? "Mark as unavailable"
+                                  : "Mark as available"
+                              }
                             >
                               {resource.available ? "Disable" : "Enable"}
                             </Button>
@@ -247,7 +260,7 @@ export default function ResourceManagementPage() {
       {/* Working Hours Dialog */}
       {scheduleResourceId !== null && (
         <WorkingHoursDialog
-          resource={resources.find(r => r.id === scheduleResourceId) || null}
+          resource={resources.find((r) => r.id === scheduleResourceId) || null}
           open={isWorkingHoursDialogOpen}
           onClose={() => {
             setIsWorkingHoursDialogOpen(false);
@@ -259,11 +272,13 @@ export default function ResourceManagementPage() {
             deletedIds.forEach((id) => {
               deleteAvailabilityRule(id);
             });
-            
+
             // Add or update rules
             rules.forEach((rule) => {
               // Check if this is a new rule (temporary ID from Date.now()) or existing
-              const existingRule = availabilityRules.find(r => r.id === rule.id);
+              const existingRule = availabilityRules.find(
+                (r) => r.id === rule.id
+              );
               if (existingRule) {
                 updateAvailabilityRule(rule);
               } else {
@@ -279,23 +294,27 @@ export default function ResourceManagementPage() {
       {/* Exceptions Dialog */}
       {scheduleResourceId !== null && (
         <ExceptionsDialog
-          resource={resources.find(r => r.id === scheduleResourceId) || null}
+          resource={resources.find((r) => r.id === scheduleResourceId) || null}
           open={isExceptionsDialogOpen}
           onClose={() => {
             setIsExceptionsDialogOpen(false);
             setScheduleResourceId(null);
           }}
-          existingExceptions={getAvailabilityExceptionsByResource(scheduleResourceId)}
+          existingExceptions={getAvailabilityExceptionsByResource(
+            scheduleResourceId
+          )}
           onSave={(exceptions, deletedIds) => {
             // Delete removed exceptions
             deletedIds.forEach((id) => {
               deleteAvailabilityException(id);
             });
-            
+
             // Add or update exceptions
             exceptions.forEach((exception) => {
               // Check if this is a new exception (temporary ID from Date.now()) or existing
-              const existingException = availabilityExceptions.find(e => e.id === exception.id);
+              const existingException = availabilityExceptions.find(
+                (e) => e.id === exception.id
+              );
               if (existingException) {
                 updateAvailabilityException(exception);
               } else {
