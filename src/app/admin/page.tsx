@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
             <CardTitle className="text-3xl">Welcome, Administrator</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Manage resources, approve bookings, and monitor system usage.
             </p>
           </CardContent>
