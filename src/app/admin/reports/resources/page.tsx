@@ -37,8 +37,13 @@ export default function ResourceUsageReportPage() {
     // Create stats array with resource info
     const stats = resources.map((resource) => {
       const bookingCount = bookingsByResource[resource.id] || 0;
-      const totalBookings = bookings.filter(b => b.status !== "Cancelled").length;
-      const usageRate = totalBookings > 0 ? Math.round((bookingCount / totalBookings) * 100) : 0;
+      const totalBookings = bookings.filter(
+        (b) => b.status !== "Cancelled"
+      ).length;
+      const usageRate =
+        totalBookings > 0
+          ? Math.round((bookingCount / totalBookings) * 100)
+          : 0;
 
       return {
         id: resource.id,
@@ -59,7 +64,7 @@ export default function ResourceUsageReportPage() {
   // Calculate category statistics
   const categoryStats = useMemo(() => {
     const stats: Record<string, { count: number; bookings: number }> = {};
-    
+
     resources.forEach((resource) => {
       if (!stats[resource.category]) {
         stats[resource.category] = { count: 0, bookings: 0 };
@@ -69,7 +74,7 @@ export default function ResourceUsageReportPage() {
 
     bookings.forEach((booking) => {
       if (booking.status !== "Cancelled") {
-        const resource = resources.find(r => r.id === booking.resourceId);
+        const resource = resources.find((r) => r.id === booking.resourceId);
         if (resource && stats[resource.category]) {
           stats[resource.category].bookings++;
         }
@@ -96,7 +101,7 @@ export default function ResourceUsageReportPage() {
     return { color: "bg-green-600", label: "Low" };
   };
 
-  const totalBookings = bookings.filter(b => b.status !== "Cancelled").length;
+  const totalBookings = bookings.filter((b) => b.status !== "Cancelled").length;
   const mostPopularResource = topResources[0];
 
   return (
@@ -125,7 +130,9 @@ export default function ResourceUsageReportPage() {
                   <BarChart3 className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total Resources</p>
+                  <p className="text-sm text-muted-foreground">
+                    Total Resources
+                  </p>
                   <p className="text-2xl font-bold">{resources.length}</p>
                 </div>
               </div>
@@ -139,7 +146,9 @@ export default function ResourceUsageReportPage() {
                   <TrendingUp className="w-6 h-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total Bookings</p>
+                  <p className="text-sm text-muted-foreground">
+                    Total Bookings
+                  </p>
                   <p className="text-2xl font-bold">{totalBookings}</p>
                 </div>
               </div>
@@ -153,7 +162,7 @@ export default function ResourceUsageReportPage() {
                   <Award className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Most Popular</p>
+                  <p className="text-sm text-muted-foreground">Most Popular</p>
                   <p className="text-lg font-bold truncate">
                     {mostPopularResource?.name || "N/A"}
                   </p>
@@ -170,7 +179,7 @@ export default function ResourceUsageReportPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <Award className="w-5 h-5 mr-2 text-yellow-600" />
+              <Award className="w-5 h-5 mr-2 " />
               Top 3 Most Popular Resources
             </CardTitle>
           </CardHeader>
@@ -180,15 +189,17 @@ export default function ResourceUsageReportPage() {
                 <div
                   key={resource.id}
                   className="p-4 border-2 rounded-lg hover:shadow-md transition-shadow"
-                  style={{
-                    borderColor: index === 0 ? "#FFD700" : index === 1 ? "#C0C0C0" : "#CD7F32",
-                  }}
+                  // style={{
+                  //   borderColor:
+                  //     index === 0
+                  //       ? "#FFD700"
+                  //       : index === 1
+                  //       ? "#C0C0C0"
+                  //       : "#CD7F32",
+                  // }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-2">
-                      <span className="text-2xl font-bold">
-                        {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
-                      </span>
                       <span className="font-semibold">#{index + 1}</span>
                     </div>
                     <Badge className="bg-blue-600">
@@ -197,11 +208,15 @@ export default function ResourceUsageReportPage() {
                   </div>
                   <h3 className="font-bold text-lg mb-1">{resource.name}</h3>
                   <p className="text-sm text-gray-600">{resource.category}</p>
-                  <p className="text-xs text-gray-500 mt-1">{resource.location}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {resource.location}
+                  </p>
                   <div className="mt-3 pt-3 border-t">
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-gray-600">Usage Rate:</span>
-                      <span className="font-semibold text-blue-600">{resource.usageRate}%</span>
+                      <span className="font-semibold text-blue-600">
+                        {resource.usageRate}%
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -237,28 +252,36 @@ export default function ResourceUsageReportPage() {
                       <TableRow key={resource.id}>
                         <TableCell className="font-medium">
                           {index + 1}
-                          {index < 3 && (
-                            <span className="ml-1">
-                              {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
-                            </span>
-                          )}
                         </TableCell>
-                        <TableCell className="font-medium">{resource.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {resource.name}
+                        </TableCell>
                         <TableCell>{resource.category}</TableCell>
-                        <TableCell className="text-sm">{resource.location}</TableCell>
+                        <TableCell className="text-sm">
+                          {resource.location}
+                        </TableCell>
                         <TableCell>{resource.capacity}</TableCell>
                         <TableCell>
-                          <Badge variant="outline">{resource.bookingCount}</Badge>
+                          <Badge variant="outline">
+                            {resource.bookingCount}
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
                             <div className="w-full bg-gray-200 rounded-full h-2 max-w-[60px]">
                               <div
                                 className="bg-blue-600 h-2 rounded-full"
-                                style={{ width: `${Math.min(resource.usageRate * 5, 100)}%` }}
+                                style={{
+                                  width: `${Math.min(
+                                    resource.usageRate * 5,
+                                    100
+                                  )}%`,
+                                }}
                               />
                             </div>
-                            <span className="text-sm font-medium">{resource.usageRate}%</span>
+                            <span className="text-sm font-medium">
+                              {resource.usageRate}%
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -292,7 +315,9 @@ export default function ResourceUsageReportPage() {
                 <TableBody>
                   {categoryStats.map((stat) => (
                     <TableRow key={stat.category}>
-                      <TableCell className="font-medium">{stat.category}</TableCell>
+                      <TableCell className="font-medium">
+                        {stat.category}
+                      </TableCell>
                       <TableCell>{stat.resourceCount}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{stat.bookingCount}</Badge>
@@ -313,27 +338,30 @@ export default function ResourceUsageReportPage() {
         {/* Insights */}
         <Card>
           <CardHeader>
-            <CardTitle>📊 Key Insights</CardTitle>
+            <CardTitle>Key Insights</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="p-3 bg-blue-50 rounded-lg">
+              <div className="p-3 bg-blue-50 dark:bg-transparent rounded-lg">
                 <p className="text-sm">
-                  <strong>Most Popular:</strong> {mostPopularResource?.name || "N/A"} with{" "}
+                  <strong>Most Popular:</strong>{" "}
+                  {mostPopularResource?.name || "N/A"} with{" "}
                   {mostPopularResource?.bookingCount || 0} bookings (
                   {mostPopularResource?.usageRate || 0}% of total)
                 </p>
               </div>
-              <div className="p-3 bg-green-50 rounded-lg">
+              <div className="p-3 bg-green-50 dark:bg-transparent rounded-lg">
                 <p className="text-sm">
-                  <strong>Top Category:</strong> {categoryStats[0]?.category || "N/A"} with{" "}
+                  <strong>Top Category:</strong>{" "}
+                  {categoryStats[0]?.category || "N/A"} with{" "}
                   {categoryStats[0]?.bookingCount || 0} total bookings
                 </p>
               </div>
-              <div className="p-3 bg-yellow-50 rounded-lg">
+              <div className="p-3 bg-yellow-50 dark:bg-transparent rounded-lg">
                 <p className="text-sm">
                   <strong>Under-utilized Resources:</strong>{" "}
-                  {resourceStats.filter(r => r.bookingCount === 0).length} resources with 0 bookings
+                  {resourceStats.filter((r) => r.bookingCount === 0).length}{" "}
+                  resources with 0 bookings
                 </p>
               </div>
             </div>
