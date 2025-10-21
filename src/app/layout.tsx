@@ -6,6 +6,8 @@ import Footer from "@/components/home/Footer";
 import { ThemeProvider } from "@/components/themeProvider";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
+// 123
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

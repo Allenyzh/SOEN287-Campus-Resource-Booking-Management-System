@@ -13,20 +13,14 @@ export const footerSections: FooterLinkSection[] = [
     title: "For Students",
     links: [
       { href: "/browse", label: "Browse Resources" },
-      { href: "/mybookings", label: "My Bookings" },
-      { href: "/profile", label: "Account Settings" },
+      { href: "/dashboard", label: "My Bookings" },
     ],
   },
   {
     title: "For Administrators",
     links: [
-      { href: "/underconstruction", label: "Admin Dashboard" },
-      { href: "/underconstruction", label: "Manage Resources" },
-      { href: "/underconstruction", label: "Usage Reports" },
+      { href: "/admin", label: "Admin Dashboard" },
+      { href: "/admin/resources", label: "Manage Resources" },
     ],
-  },
-  {
-    title: "Support",
-    links: [{ href: "/help", label: "Help Center" }],
   },
 ];

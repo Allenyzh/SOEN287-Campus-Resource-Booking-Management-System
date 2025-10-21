@@ -23,8 +23,8 @@ const navItems: NavItem[] = [
     href: "/browse",
   },
   {
-    label: "My Bookings",
-    href: "/mybookings",
+    label: "Dashboard",
+    href: "/dashboard",
   },
 ];
 
@@ -71,9 +71,11 @@ export default function Nav() {
           </nav>
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              Sign In
+              <Link href="/sign-in">Sign In</Link>
             </Button>
-            <Button size="sm">Get Started</Button>
+            <Button size="sm" asChild>
+              <Link href="/create-account">Get Started</Link>
+            </Button>
             <div className="hidden xl:block">
               <ThemeButton />
             </div>

@@ -1,143 +1,151 @@
 # SOEN287 Campus Resource Booking Management System
 
-## 代码协作
-
-- 每个提交需要新建 Branch，并创建 Pull Request，这样可以看到每个人做的内容，同时可以有效的处理代码冲突
+[中文](./docs/README.zh.md)
 
 ---
 
-## 功能特点
+## Code Collaboration
 
-- **实时预约卡片**：展示资源可用性，突出实时预订体验。
-- **响应式导航**：桌面端横向导航 + 移动端抽屉菜单，所有链接共用同一数据源，易于维护。
-- **信息展示组件**：`DisplayCard`、`Features`、`Resource` 等组件均为数据驱动，可重复复用。
-- **现代化界面**：采用 Tailwind CSS + shadcn/ui
+- Create a new branch for each contribution and open a Pull Request. This lets everyone see what changed and helps resolve merge conflicts efficiently.
 
 ---
 
-## 技术栈
+## Features
 
-- [Next.js 15](https://nextjs.org/)（App Router）
+- Real-time booking cards: show resource availability and emphasize an instant booking experience.
+- Responsive navigation: horizontal nav on desktop + drawer menu on mobile, all powered by a single data source for easy maintenance.
+- Informational components: components like `DisplayCard`, `Features`, and `Resource` are data-driven and reusable.
+- Modern UI: built with Tailwind CSS + shadcn/ui.
+
+---
+
+## Tech Stack
+
+- [Next.js 15](https://nextjs.org/) (App Router)
 - [React 19](https://react.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS 4](https://tailwindcss.com/)
-- [shadcn/ui](https://ui.shadcn.com/) 组件库
-- [pnpm](https://pnpm.io/) 作为推荐的包管理器
+- [shadcn/ui](https://ui.shadcn.com/) component library
+- [pnpm](https://pnpm.io/) as the recommended package manager
 
 ---
 
-## 环境准备
+## Environment Setup
 
-1. **安装 Node.js（推荐 LTS 版本 ≥ 20）**
+1. Install Node.js (LTS version ≥ 20 recommended)
 
-   - 前往 [nodejs.org](https://nodejs.org/) 下载并安装。
-   - 安装完成后，在终端（macOS 的 Terminal 或 Windows 的 PowerShell）输入：
+   - Download and install from [nodejs.org](https://nodejs.org/).
+   - After installation, verify in your terminal (Terminal on macOS, PowerShell on Windows):
 
      ```bash
      node -v
      npm -v
      ```
 
-     若能看到版本号，说明安装成功。
+     If versions are printed, the installation is successful.
 
-2. **安装 pnpm（推荐）**
+2. Install pnpm (recommended)
 
-   - 在终端输入：
+   - In your terminal, run:
 
      ```bash
      npm install -g pnpm
      ```
 
-   - 验证：
+   - Verify:
 
      ```bash
      pnpm -v
      ```
 
-   - 如果你更习惯 npm / yarn 也可以，但文档默认使用 pnpm。
-     > ps: pnpm 包管理器比 npm 更省磁盘空间
+   - You can use npm/yarn if you prefer, but this documentation uses pnpm by default.
+     > ps: pnpm generally saves disk space compared to npm.
 
-3. **准备一个 Git 客户端（可选）**
-   - 推荐使用 github desktop [Github Desktop](https://desktop.github.com/download/)
+3. Prepare a Git client (optional)
+
+   - We recommend [GitHub Desktop](https://desktop.github.com/download/).
 
 ---
 
-## 本地启动步骤
+## Run Locally
 
-下面的命令适用于 macOS 的 `zsh`，Windows 用户在 PowerShell 中执行同样的命令即可。
+The following commands are shown for macOS `zsh`. Windows users can run the same commands in PowerShell.
 
-1. **克隆仓库（或解压 ZIP）**
+1. Clone the repository (or unzip the ZIP)
 
-   - 如果安装了 github desktop，点击
-     ![alt text](image.png)
+   - If you installed GitHub Desktop, click:
+     ![Open in GitHub Desktop](./docs/image.png)
 
-2. **安装依赖**
+2. Install dependencies
 
    ```bash
    pnpm install
    ```
 
-3. **启动开发服务器**
+3. Start the dev server
 
    ```bash
    pnpm dev
    ```
 
-4. **访问项目**
+4. Open the app
 
-   - 默认地址是 <http://localhost:3000>
+   - Default URL: <http://localhost:3000>
 
-5. **停止开发服务器**
-   - 在运行命令的终端中按 `Ctrl + C`
+5. Stop the dev server
+
+   - Press `Ctrl + C` in the terminal where it’s running.
 
 ---
 
-## 项目结构导览
+## Project Structure Overview
 
 ```text
 SOEN287-Campus-Resource-Booking-Management-System
-├── public/                     # 静态资源
+├── public/                     # Static assets
 │   └── *.svg
 ├── src/
-│   ├── app/                    # Next.js App Router 入口
-│   │   ├── page.tsx            # 首页
-│   │   ├── layout.tsx          # 全局布局
-│   │   └── globals.css         # 全局样式
+│   ├── app/                    # Next.js App Router entry
+│   │   ├── page.tsx            # Home page
+│   │   ├── layout.tsx          # Global layout
+│   │   └── globals.css         # Global styles
 │   ├── components/
 │   │   ├── home/
-│   │   │   ├── DisplayCard.tsx # 通用卡片组件
-│   │   │   ├── Features.tsx    # 功能板块
-│   │   │   ├── Resource.tsx    # 资源列表
-│   │   │   ├── SideDrawer.tsx  # 移动端抽屉导航
-│   │   │   └── nav.tsx         # 顶部导航
-│   │   └── ui/                 # shadcn/ui 组件封装
+│   │   │   ├── DisplayCard.tsx # Generic card component
+│   │   │   ├── Features.tsx    # Feature section
+│   │   │   ├── Resource.tsx    # Resource list
+│   │   │   ├── SideDrawer.tsx  # Mobile drawer navigation
+│   │   │   └── nav.tsx         # Top navigation
+│   │   └── ui/                 # shadcn/ui wrappers
 │   └── lib/
-│       └── utils.ts            # 工具函数
-├── next.config.ts              # Next.js 配置
-├── package.json                # 项目信息与脚本
-└── tsconfig.json               # TypeScript 配置
+│       └── utils.ts            # Utility functions
+├── next.config.ts              # Next.js config
+├── package.json                # Project metadata & scripts
+└── tsconfig.json               # TypeScript config
 ```
 
 ---
 
-## 常见问题排查
+## Troubleshooting
 
-| 问题描述                         | 解决方案                                                                                                                         |
-|----------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
-| `pnpm` 命令不存在                | 先执行 `npm install -g pnpm` 安装全局 pnpm                                                                                       |
-| 浏览器访问局域网地址时报跨域错误 | 打开 `next.config.ts`，在 `allowedDevOrigins` 中加入对应的 `http://IP:端口`，保存后重启 `pnpm dev`                                 |
-| 端口 3000 被占用                 | 修改启动命令：`pnpm dev -- --port 3001`，然后访问 `http://localhost:3001`                                                          |
-| TypeScript 报错或语法高亮异常    | 确认 VS Code 安装了官方的 **TypeScript + JavaScript Language Features** 插件，并使用工作区内的 TypeScript（VS Code 会在状态栏提示） |
-
----
-
-## 参与贡献
+| Issue                                            | Solution                                                                                                                                                          |
+|--------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `pnpm` command not found                         | Run `npm install -g pnpm` to install pnpm globally.                                                                                                               |
+| CORS error when accessing via LAN address        | Open `next.config.ts`, add the corresponding `http://IP:PORT` to `allowedDevOrigins`, then restart with `pnpm dev`.                                               |
+| Port 3000 is in use                              | Start on a different port: `pnpm dev -- --port 3001`, then open `http://localhost:3001`.                                                                          |
+| TypeScript errors or missing syntax highlighting | Ensure VS Code has the built-in "TypeScript + JavaScript Language Features" enabled and that you’re using the workspace TypeScript (indicated in the status bar). |
 
 ---
 
-## 资源文档
+## Contributing
 
-- [Next.js 官方文档](https://nextjs.org/docs)
-- [React 官方文档](https://react.dev/learn)
+Contributions are welcome! Please create a branch for your change, open a Pull Request, and follow the steps in this README to set up and run the project locally.
+
+---
+
+## Documentation & Resources
+
+- [Next.js Docs](https://nextjs.org/docs)
+- [React Docs](https://react.dev/learn)
 - [Tailwind CSS Docs](https://tailwindcss.com/docs)
-- [shadcn/ui 教程](https://ui.shadcn.com/docs)
+- [shadcn/ui Docs](https://ui.shadcn.com/docs)

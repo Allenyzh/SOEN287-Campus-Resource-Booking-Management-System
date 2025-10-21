@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-border bg-muted/30 pt-12 pb-8 px-4">
       <div className="container mx-auto">
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8">
           {footerSections.map((section: FooterLinkSection) => (
             <div
               key={section.title}
