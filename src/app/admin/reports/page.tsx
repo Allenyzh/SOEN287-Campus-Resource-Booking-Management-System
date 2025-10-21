@@ -3,7 +3,13 @@
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BarChart3, Clock, TrendingUp, FileText } from "lucide-react";
+import {
+  ArrowLeft,
+  BarChart3,
+  Clock,
+  TrendingUp,
+  FileText,
+} from "lucide-react";
 
 export default function ReportsPage() {
   const router = useRouter();
@@ -15,12 +21,18 @@ export default function ReportsPage() {
   const reports = [
     {
       title: "Resource Usage Report",
-      description: "View popular resources, usage statistics, and category analytics",
+      description:
+        "View popular resources, usage statistics, and category analytics",
       icon: <BarChart3 className="w-8 h-8" />,
       color: "bg-blue-100",
       iconColor: "text-blue-600",
       path: "/admin/reports/resources",
-      features: ["Popular resources ranking", "Usage rate analysis", "Category statistics", "Under-utilized resources"],
+      features: [
+        "Popular resources ranking",
+        "Usage rate analysis",
+        "Category statistics",
+        "Under-utilized resources",
+      ],
     },
     {
       title: "Peak Times Analysis",
@@ -29,7 +41,12 @@ export default function ReportsPage() {
       color: "bg-orange-100",
       iconColor: "text-orange-600",
       path: "/admin/reports/peak-times",
-      features: ["Day of week analysis", "Time slot patterns", "24-hour heat map", "Busiest dates"],
+      features: [
+        "Day of week analysis",
+        "Time slot patterns",
+        "24-hour heat map",
+        "Busiest dates",
+      ],
     },
   ];
 
@@ -60,7 +77,8 @@ export default function ReportsPage() {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              View comprehensive reports and analytics about resource usage, booking patterns, and system performance.
+              View comprehensive reports and analytics about resource usage,
+              booking patterns, and system performance.
             </p>
           </CardContent>
         </Card>
@@ -77,10 +95,10 @@ export default function ReportsPage() {
                 <div className="space-y-4">
                   {/* Icon and Title */}
                   <div className="flex items-start space-x-4">
-                    <div className={`p-4 ${report.color} rounded-lg group-hover:scale-110 transition-transform`}>
-                      <div className={report.iconColor}>
-                        {report.icon}
-                      </div>
+                    <div
+                      className={`p-4 ${report.color} rounded-lg group-hover:scale-110 transition-transform`}
+                    >
+                      <div className={report.iconColor}>{report.icon}</div>
                     </div>
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold mb-2 group-hover:text-blue-600 transition-colors">
@@ -119,29 +137,6 @@ export default function ReportsPage() {
             </Card>
           ))}
         </div>
-
-        {/* Coming Soon Section */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="text-lg">🚀 Coming Soon</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-semibold mb-1">User Analytics</h4>
-                <p className="text-sm text-gray-600">Track user behavior and booking patterns</p>
-              </div>
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-semibold mb-1">Revenue Reports</h4>
-                <p className="text-sm text-gray-600">Financial analytics and revenue tracking</p>
-              </div>
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-semibold mb-1">Export to PDF/Excel</h4>
-                <p className="text-sm text-gray-600">Download reports for offline analysis</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </main>
     </div>
   );

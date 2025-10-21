@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
   }, [bookings]);
 
   const availableResources = useMemo(() => {
-    return resources.filter(r => r.available).length;
+    return resources.filter((r) => r.available).length;
   }, [resources]);
 
   const resourceAvailability = useMemo(() => {
@@ -94,8 +94,8 @@ export default function AdminDashboardPage() {
         {/* Quick Actions Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* Resource Management Card */}
-          <Card 
-            className="hover:shadow-lg transition-shadow cursor-pointer" 
+          <Card
+            className="hover:shadow-lg transition-shadow cursor-pointer"
             onClick={navigateToResources}
           >
             <CardContent className="p-6">
@@ -105,15 +105,17 @@ export default function AdminDashboardPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">Resource Management</h3>
-                  <p className="text-gray-600">Add, edit, or remove resources</p>
+                  <p className="text-gray-600">
+                    Add, edit, or remove resources
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Booking Management Card */}
-          <Card 
-            className="hover:shadow-lg transition-shadow cursor-pointer" 
+          <Card
+            className="hover:shadow-lg transition-shadow cursor-pointer"
             onClick={navigateToBookings}
           >
             <CardContent className="p-6">
@@ -130,8 +132,8 @@ export default function AdminDashboardPage() {
           </Card>
 
           {/* Reports & Analytics Card */}
-          <Card 
-            className="hover:shadow-lg transition-shadow cursor-pointer" 
+          <Card
+            className="hover:shadow-lg transition-shadow cursor-pointer"
             onClick={navigateToReports}
           >
             <CardContent className="p-6">
@@ -141,7 +143,9 @@ export default function AdminDashboardPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">Reports & Analytics</h3>
-                  <p className="text-gray-600">View usage statistics and trends</p>
+                  <p className="text-gray-600">
+                    View usage statistics and trends
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -155,23 +159,29 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="p-4 border-1 rounded-lg">
                 <div className="text-2xl font-bold text-blue-600">
                   {resources.length}
                 </div>
-                <div className="text-sm text-gray-600">Total Resources</div>
+                <div className="text-sm text-muted-foreground">
+                  Total Resources
+                </div>
               </div>
-              <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="p-4 border-1 rounded-lg">
                 <div className="text-2xl font-bold text-green-600">
                   {availableResources}
                 </div>
-                <div className="text-sm text-gray-600">Available Resources</div>
+                <div className="text-sm text-muted-foreground">
+                  Available Resources
+                </div>
               </div>
-              <div className="p-4 bg-gray-50 rounded-lg">
+              <div className="p-4 border-1 rounded-lg">
                 <div className="text-2xl font-bold text-purple-600">
                   {resourceAvailability}%
                 </div>
-                <div className="text-sm text-gray-600">Resource Availability</div>
+                <div className="text-sm text-muted-foreground">
+                  Resource Availability
+                </div>
               </div>
             </div>
           </CardContent>

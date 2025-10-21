@@ -26,8 +26,20 @@ export default function PeakTimesReportPage() {
 
   // Analyze bookings by day of week
   const dayOfWeekStats = useMemo(() => {
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const stats = days.map((day, index) => ({ day, dayIndex: index, count: 0 }));
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const stats = days.map((day, index) => ({
+      day,
+      dayIndex: index,
+      count: 0,
+    }));
 
     bookings.forEach((booking) => {
       if (booking.status !== "Cancelled") {
@@ -57,11 +69,12 @@ export default function PeakTimesReportPage() {
         const timeMatch = booking.time.match(/^(\d{1,2}):/);
         if (timeMatch) {
           const hour = parseInt(timeMatch[1]);
-          
+
           if (hour >= 6 && hour < 9) slots["Morning (6:00-9:00)"]++;
           else if (hour >= 9 && hour < 12) slots["Mid-Morning (9:00-12:00)"]++;
           else if (hour >= 12 && hour < 15) slots["Afternoon (12:00-15:00)"]++;
-          else if (hour >= 15 && hour < 18) slots["Late Afternoon (15:00-18:00)"]++;
+          else if (hour >= 15 && hour < 18)
+            slots["Late Afternoon (15:00-18:00)"]++;
           else if (hour >= 18 && hour < 21) slots["Evening (18:00-21:00)"]++;
           else if (hour >= 21 || hour < 6) slots["Night (21:00-24:00)"]++;
         }
@@ -124,7 +137,7 @@ export default function PeakTimesReportPage() {
       .slice(0, 10); // Top 10 busiest dates
   }, [bookings]);
 
-  const totalBookings = bookings.filter(b => b.status !== "Cancelled").length;
+  const totalBookings = bookings.filter((b) => b.status !== "Cancelled").length;
   const peakDay = dayOfWeekStats[0];
   const peakTimeSlot = timeSlotStats[0];
   const peakHour = hourlyStats[0];
@@ -133,16 +146,16 @@ export default function PeakTimesReportPage() {
   const getIntensityColor = (count: number, maxCount: number) => {
     if (maxCount === 0) return "bg-gray-100";
     const intensity = count / maxCount;
-    if (intensity >= 0.8) return "bg-red-600";
+    if (intensity >= 0.8) return "bg-red-500";
     if (intensity >= 0.6) return "bg-orange-500";
     if (intensity >= 0.4) return "bg-yellow-500";
     if (intensity >= 0.2) return "bg-green-500";
     if (intensity > 0) return "bg-blue-400";
-    return "bg-gray-100";
+    return "bg-gray-500 dark:bg-transparent";
   };
 
-  const maxDayCount = Math.max(...dayOfWeekStats.map(d => d.count));
-  const maxTimeCount = Math.max(...timeSlotStats.map(t => t.count));
+  const maxDayCount = Math.max(...dayOfWeekStats.map((d) => d.count));
+  const maxTimeCount = Math.max(...timeSlotStats.map((t) => t.count));
 
   return (
     <div className="flex-1">
@@ -172,7 +185,9 @@ export default function PeakTimesReportPage() {
                 <div>
                   <p className="text-sm text-gray-600">Peak Day</p>
                   <p className="text-xl font-bold">{peakDay?.day || "N/A"}</p>
-                  <p className="text-xs text-gray-500">{peakDay?.count || 0} bookings</p>
+                  <p className="text-xs text-gray-500">
+                    {peakDay?.count || 0} bookings
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -186,8 +201,12 @@ export default function PeakTimesReportPage() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Peak Time Slot</p>
-                  <p className="text-sm font-bold">{peakTimeSlot?.slot || "N/A"}</p>
-                  <p className="text-xs text-gray-500">{peakTimeSlot?.count || 0} bookings</p>
+                  <p className="text-sm font-bold">
+                    {peakTimeSlot?.slot || "N/A"}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {peakTimeSlot?.count || 0} bookings
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -202,7 +221,9 @@ export default function PeakTimesReportPage() {
                 <div>
                   <p className="text-sm text-gray-600">Peak Hour</p>
                   <p className="text-xl font-bold">{peakHour?.time || "N/A"}</p>
-                  <p className="text-xs text-gray-500">{peakHour?.count || 0} bookings</p>
+                  <p className="text-xs text-gray-500">
+                    {peakHour?.count || 0} bookings
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -224,10 +245,19 @@ export default function PeakTimesReportPage() {
                   <div className="w-32 font-medium">{stat.day}</div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <div className="flex-1 bg-gray-200 rounded-full h-8 relative overflow-hidden">
+                      <div className="flex-1 rounded-full h-8 relative overflow-hidden">
                         <div
-                          className={`h-8 rounded-full transition-all ${getIntensityColor(stat.count, maxDayCount)}`}
-                          style={{ width: `${maxDayCount > 0 ? (stat.count / maxDayCount) * 100 : 0}%` }}
+                          className={`h-8 rounded-full transition-all ${getIntensityColor(
+                            stat.count,
+                            maxDayCount
+                          )}`}
+                          style={{
+                            width: `${
+                              maxDayCount > 0
+                                ? (stat.count / maxDayCount) * 100
+                                : 0
+                            }%`,
+                          }}
                         />
                         <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold">
                           {stat.count} bookings
@@ -259,12 +289,21 @@ export default function PeakTimesReportPage() {
                   <div className="w-48 font-medium text-sm">{stat.slot}</div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <div className="flex-1 bg-gray-200 rounded-full h-8 relative overflow-hidden">
+                      <div className="flex-1 rounded-full h-8 relative overflow-hidden">
                         <div
-                          className={`h-8 rounded-full transition-all ${getIntensityColor(stat.count, maxTimeCount)}`}
-                          style={{ width: `${maxTimeCount > 0 ? (stat.count / maxTimeCount) * 100 : 0}%` }}
+                          className={`h-8 rounded-full transition-all ${getIntensityColor(
+                            stat.count,
+                            maxTimeCount
+                          )}`}
+                          style={{
+                            width: `${
+                              maxTimeCount > 0
+                                ? (stat.count / maxTimeCount) * 100
+                                : 0
+                            }%`,
+                          }}
                         />
-                        <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold">
+                        <span className="absolute inset-0 flex items-center justify-center text-sm  font-semibold">
                           {stat.count} bookings
                         </span>
                       </div>
@@ -287,22 +326,29 @@ export default function PeakTimesReportPage() {
           <CardContent>
             <div className="grid grid-cols-6 md:grid-cols-12 gap-2">
               {hourlyStats.slice(0, 24).map((stat) => {
-                const maxCount = Math.max(...hourlyStats.map(h => h.count));
+                const maxCount = Math.max(...hourlyStats.map((h) => h.count));
                 return (
                   <div
                     key={stat.hour}
-                    className={`p-3 rounded-lg text-center transition-all hover:scale-105 cursor-pointer ${getIntensityColor(stat.count, maxCount)}`}
+                    className={`p-3 rounded-lg text-center transition-all hover:scale-105 cursor-pointer ${getIntensityColor(
+                      stat.count,
+                      maxCount
+                    )}`}
                     title={`${stat.time}: ${stat.count} bookings`}
                   >
-                    <div className="text-xs font-semibold text-white">{stat.hour}:00</div>
-                    <div className="text-sm font-bold text-white">{stat.count}</div>
+                    <div className="text-xs font-semibold text-white">
+                      {stat.hour}:00
+                    </div>
+                    <div className="text-sm font-bold text-white">
+                      {stat.count}
+                    </div>
                   </div>
                 );
               })}
             </div>
             <div className="mt-4 flex items-center justify-center space-x-4 text-sm">
               <div className="flex items-center space-x-2">
-                <div className="w-4 h-4 bg-gray-100 rounded" />
+                <div className="w-4 h-4 bg-gray-500 dark:bg-transparent rounded" />
                 <span>No bookings</span>
               </div>
               <div className="flex items-center space-x-2">
@@ -340,16 +386,19 @@ export default function PeakTimesReportPage() {
                 <TableBody>
                   {dateStats.map((stat, index) => {
                     const date = new Date(stat.date);
-                    const dayName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][date.getDay()];
+                    const dayName = [
+                      "Sunday",
+                      "Monday",
+                      "Tuesday",
+                      "Wednesday",
+                      "Thursday",
+                      "Friday",
+                      "Saturday",
+                    ][date.getDay()];
                     return (
                       <TableRow key={stat.date}>
                         <TableCell className="font-medium">
                           #{index + 1}
-                          {index < 3 && (
-                            <span className="ml-1">
-                              {index === 0 ? "🔥" : index === 1 ? "⚡" : "✨"}
-                            </span>
-                          )}
                         </TableCell>
                         <TableCell>{stat.date}</TableCell>
                         <TableCell>{dayName}</TableCell>
@@ -370,25 +419,31 @@ export default function PeakTimesReportPage() {
         {/* Key Insights */}
         <Card>
           <CardHeader>
-            <CardTitle>📊 Key Insights</CardTitle>
+            <CardTitle>Key Insights</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="p-3 bg-red-50 rounded-lg">
+              <div className="p-3 rounded-lg">
                 <p className="text-sm">
-                  <strong>🔥 Busiest Day:</strong> {peakDay?.day || "N/A"} with {peakDay?.count || 0} bookings
-                  ({peakDay && totalBookings > 0 ? Math.round((peakDay.count / totalBookings) * 100) : 0}% of total)
+                  <strong>Busiest Day:</strong> {peakDay?.day || "N/A"} with{" "}
+                  {peakDay?.count || 0} bookings (
+                  {peakDay && totalBookings > 0
+                    ? Math.round((peakDay.count / totalBookings) * 100)
+                    : 0}
+                  % of total)
                 </p>
               </div>
-              <div className="p-3 bg-orange-50 rounded-lg">
+              <div className="p-3 rounded-lg">
                 <p className="text-sm">
-                  <strong>⏰ Peak Time:</strong> {peakTimeSlot?.slot || "N/A"} with {peakTimeSlot?.count || 0} bookings
+                  <strong>Peak Time:</strong> {peakTimeSlot?.slot || "N/A"} with{" "}
+                  {peakTimeSlot?.count || 0} bookings
                 </p>
               </div>
-              <div className="p-3 bg-blue-50 rounded-lg">
+              <div className="p-3 rounded-lg">
                 <p className="text-sm">
-                  <strong>💡 Recommendation:</strong> Consider adding more resources during peak hours (
-                  {peakHour?.time || "N/A"}) on {peakDay?.day || "busy days"}
+                  <strong>Recommendation:</strong> Consider adding more
+                  resources during peak hours ({peakHour?.time || "N/A"}) on{" "}
+                  {peakDay?.day || "busy days"}
                 </p>
               </div>
             </div>
