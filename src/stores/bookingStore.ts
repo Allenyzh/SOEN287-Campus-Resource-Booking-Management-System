@@ -26,17 +26,17 @@ export interface AvailabilityRule {
   id: number;
   resourceId: number;
   dayOfWeek: number; // 0=Sunday, 1=Monday, ..., 6=Saturday
-  openTime: string;  // "HH:mm" format, e.g., "08:00"
+  openTime: string; // "HH:mm" format, e.g., "08:00"
   closeTime: string; // "HH:mm" format, e.g., "20:00"
 }
 
 export interface AvailabilityException {
   id: number;
   resourceId: number;
-  startDate: string;     // "YYYY-MM-DD" format
-  endDate: string;       // "YYYY-MM-DD" format
+  startDate: string; // "YYYY-MM-DD" format
+  endDate: string; // "YYYY-MM-DD" format
   isUnavailable: boolean; // true = blocked/unavailable, false = special availability
-  reason?: string;       // Optional reason/description
+  reason?: string; // Optional reason/description
   type: "holiday" | "maintenance" | "special_event" | "other";
 }
 
@@ -45,7 +45,7 @@ interface BookingStore {
   bookings: Booking[];
   availabilityRules: AvailabilityRule[];
   availabilityExceptions: AvailabilityException[];
-  
+
   // User booking functions
   addBooking: (booking: Omit<Booking, "id">) => void;
   updateBooking: (id: number, updates: { date: string; time: string }) => void;
@@ -53,24 +53,43 @@ interface BookingStore {
   updateBookingStatus: (id: number, status: Booking["status"]) => void;
   getBookingsByResource: (resourceId: number) => Booking[];
   getUserBookings: (userName: string) => Booking[];
-  
+
   // Admin resource management functions
   addResource: (resource: Omit<Resource, "id">) => void;
   updateResource: (resource: Resource) => void;
   deleteResource: (id: number) => void;
   toggleResourceAvailability: (id: number) => void;
-  
+
   // Availability rules management
   addAvailabilityRule: (rule: Omit<AvailabilityRule, "id">) => void;
   updateAvailabilityRule: (rule: AvailabilityRule) => void;
   deleteAvailabilityRule: (id: number) => void;
   getAvailabilityRulesByResource: (resourceId: number) => AvailabilityRule[];
-  
+
   // Availability exceptions management
-  addAvailabilityException: (exception: Omit<AvailabilityException, "id">) => void;
+  addAvailabilityException: (
+    exception: Omit<AvailabilityException, "id">
+  ) => void;
   updateAvailabilityException: (exception: AvailabilityException) => void;
   deleteAvailabilityException: (id: number) => void;
-  getAvailabilityExceptionsByResource: (resourceId: number) => AvailabilityException[];
+  getAvailabilityExceptionsByResource: (
+    resourceId: number
+  ) => AvailabilityException[];
+
+  // Availability validation functions
+  isDateAvailable: (resourceId: number, date: string) => {
+    available: boolean;
+    reason?: string;
+  };
+  getAvailableTimeSlots: (resourceId: number, date: string) => string[];
+  isTimeSlotAvailable: (
+    resourceId: number,
+    date: string,
+    timeSlot: string
+  ) => {
+    available: boolean;
+    reason?: string;
+  };
 }
 
 // Mock resource data
@@ -457,12 +476,16 @@ export const useBookingStore = create<BookingStore>()(
 
       deleteAvailabilityRule: (id) => {
         set((state) => ({
-          availabilityRules: state.availabilityRules.filter((rule) => rule.id !== id),
+          availabilityRules: state.availabilityRules.filter(
+            (rule) => rule.id !== id
+          ),
         }));
       },
 
       getAvailabilityRulesByResource: (resourceId) => {
-        return get().availabilityRules.filter((rule) => rule.resourceId === resourceId);
+        return get().availabilityRules.filter(
+          (rule) => rule.resourceId === resourceId
+        );
       },
 
       // Availability exceptions management
@@ -472,14 +495,20 @@ export const useBookingStore = create<BookingStore>()(
           id: Date.now(),
         };
         set((state) => ({
-          availabilityExceptions: [...state.availabilityExceptions, newException],
+          availabilityExceptions: [
+            ...state.availabilityExceptions,
+            newException,
+          ],
         }));
       },
 
       updateAvailabilityException: (updatedException) => {
         set((state) => ({
-          availabilityExceptions: state.availabilityExceptions.map((exception) =>
-            exception.id === updatedException.id ? updatedException : exception
+          availabilityExceptions: state.availabilityExceptions.map(
+            (exception) =>
+              exception.id === updatedException.id
+                ? updatedException
+                : exception
           ),
         }));
       },
@@ -496,6 +525,120 @@ export const useBookingStore = create<BookingStore>()(
         return get().availabilityExceptions.filter(
           (exception) => exception.resourceId === resourceId
         );
+      },
+
+      // Availability validation functions
+      isDateAvailable: (resourceId, date) => {
+        const state = get();
+        const exceptions = state.availabilityExceptions.filter(
+          (ex) => ex.resourceId === resourceId
+        );
+
+        // Check if date falls within any exception period
+        const dateObj = new Date(date);
+        for (const exception of exceptions) {
+          const startDate = new Date(exception.startDate);
+          const endDate = new Date(exception.endDate);
+
+          if (dateObj >= startDate && dateObj <= endDate) {
+            if (exception.isUnavailable) {
+              return {
+                available: false,
+                reason: `${exception.type}: ${exception.reason || "Not available"}`,
+              };
+            }
+          }
+        }
+
+        // Check if day of week has availability rules
+        const dayOfWeek = dateObj.getDay();
+        const rules = state.availabilityRules.filter(
+          (rule) => rule.resourceId === resourceId && rule.dayOfWeek === dayOfWeek
+        );
+
+        if (rules.length === 0) {
+          // No rules defined for this day, assume unavailable
+          return {
+            available: false,
+            reason: "No availability rules defined for this day",
+          };
+        }
+
+        return { available: true };
+      },
+
+      getAvailableTimeSlots: (resourceId, date) => {
+        const state = get();
+        const dateAvailability = state.isDateAvailable(resourceId, date);
+
+        if (!dateAvailability.available) {
+          return [];
+        }
+
+        const dateObj = new Date(date);
+        const dayOfWeek = dateObj.getDay();
+
+        // Get availability rules for this day
+        const rules = state.availabilityRules.filter(
+          (rule) => rule.resourceId === resourceId && rule.dayOfWeek === dayOfWeek
+        );
+
+        if (rules.length === 0) {
+          return [];
+        }
+
+        // Generate time slots based on rules
+        const allTimeSlots = [
+          "08:00 - 10:00",
+          "10:00 - 12:00",
+          "12:00 - 14:00",
+          "14:00 - 16:00",
+          "16:00 - 18:00",
+          "18:00 - 20:00",
+        ];
+
+        const availableSlots = allTimeSlots.filter((slot) => {
+          const [startTime] = slot.split(" - ");
+          const [endTime] = slot.split(" - ")[1];
+
+          // Check if time slot falls within any rule's open hours
+          return rules.some((rule) => {
+            return startTime >= rule.openTime && endTime <= rule.closeTime;
+          });
+        });
+
+        // Filter out already booked slots
+        const existingBookings = state.bookings.filter(
+          (booking) =>
+            booking.resourceId === resourceId &&
+            booking.date === date &&
+            booking.status !== "Cancelled"
+        );
+
+        return availableSlots.filter(
+          (slot) => !existingBookings.some((booking) => booking.time === slot)
+        );
+      },
+
+      isTimeSlotAvailable: (resourceId, date, timeSlot) => {
+        const state = get();
+
+        // First check if date is available
+        const dateAvailability = state.isDateAvailable(resourceId, date);
+        if (!dateAvailability.available) {
+          return dateAvailability;
+        }
+
+        // Check if time slot is in available slots
+        const availableSlots = state.getAvailableTimeSlots(resourceId, date);
+        if (!availableSlots.includes(timeSlot)) {
+          return {
+            available: false,
+            reason: "Time slot is not available or already booked",
+          };
+        }
+
+        return { available: true };
       },
     }),
     {

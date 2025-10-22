@@ -12,7 +12,7 @@ import { Search, Filter } from "lucide-react";
 
 export default function BrowseResourcesPage() {
   const _router = useRouter(); // Reserved for future navigation
-  const { resources, addBooking } = useBookingStore();
+  const { resources, addBooking, isTimeSlotAvailable } = useBookingStore();
 
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
@@ -51,6 +51,20 @@ export default function BrowseResourcesPage() {
     time: string;
   }) => {
     if (!selectedResource) return;
+
+    // Final validation before adding booking
+    const availability = isTimeSlotAvailable(
+      selectedResource.id,
+      bookingDetails.date,
+      bookingDetails.time
+    );
+
+    if (!availability.available) {
+      alert(
+        `Unable to book: ${availability.reason || "Time slot is not available"}`
+      );
+      return;
+    }
 
     addBooking({
       resourceId: selectedResource.id,
