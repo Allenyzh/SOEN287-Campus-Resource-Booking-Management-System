@@ -66,11 +66,7 @@ export function BookingDialog({
   const handleConfirm = () => {
     if (date && timeSlot && resource) {
       // Final validation before booking
-      const slotAvailability = isTimeSlotAvailable(
-        resource.id,
-        date,
-        timeSlot
-      );
+      const slotAvailability = isTimeSlotAvailable(resource.id, date, timeSlot);
       if (!slotAvailability.available) {
         alert(
           slotAvailability.reason || "This time slot is no longer available"

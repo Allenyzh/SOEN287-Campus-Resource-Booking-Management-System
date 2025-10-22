@@ -77,7 +77,10 @@ interface BookingStore {
   ) => AvailabilityException[];
 
   // Availability validation functions
-  isDateAvailable: (resourceId: number, date: string) => {
+  isDateAvailable: (
+    resourceId: number,
+    date: string
+  ) => {
     available: boolean;
     reason?: string;
   };
@@ -544,7 +547,9 @@ export const useBookingStore = create<BookingStore>()(
             if (exception.isUnavailable) {
               return {
                 available: false,
-                reason: `${exception.type}: ${exception.reason || "Not available"}`,
+                reason: `${exception.type}: ${
+                  exception.reason || "Not available"
+                }`,
               };
             }
           }
@@ -553,7 +558,8 @@ export const useBookingStore = create<BookingStore>()(
         // Check if day of week has availability rules
         const dayOfWeek = dateObj.getDay();
         const rules = state.availabilityRules.filter(
-          (rule) => rule.resourceId === resourceId && rule.dayOfWeek === dayOfWeek
+          (rule) =>
+            rule.resourceId === resourceId && rule.dayOfWeek === dayOfWeek
         );
 
         if (rules.length === 0) {
@@ -580,7 +586,8 @@ export const useBookingStore = create<BookingStore>()(
 
         // Get availability rules for this day
         const rules = state.availabilityRules.filter(
-          (rule) => rule.resourceId === resourceId && rule.dayOfWeek === dayOfWeek
+          (rule) =>
+            rule.resourceId === resourceId && rule.dayOfWeek === dayOfWeek
         );
 
         if (rules.length === 0) {

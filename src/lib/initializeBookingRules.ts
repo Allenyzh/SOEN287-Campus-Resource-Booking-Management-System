@@ -1,6 +1,6 @@
 /**
  * 示例：如何为资源添加可用性规则和异常
- * 
+ *
  * 这个文件展示了如何使用 bookingStore 的 API 来设置资源的工作时间和异常日期
  */
 
@@ -10,7 +10,8 @@ import { useBookingStore } from "@/stores/bookingStore";
  * 为 Study Room 101 设置工作时间
  */
 export function setupStudyRoom101Schedule() {
-  const { addAvailabilityRule, addAvailabilityException } = useBookingStore.getState();
+  const { addAvailabilityRule, addAvailabilityException } =
+    useBookingStore.getState();
 
   // 周一到周五：08:00 - 20:00
   for (let day = 1; day <= 5; day++) {
@@ -49,7 +50,8 @@ export function setupStudyRoom101Schedule() {
  * 为 Computer Lab 2 设置工作时间
  */
 export function setupComputerLab2Schedule() {
-  const { addAvailabilityRule, addAvailabilityException } = useBookingStore.getState();
+  const { addAvailabilityRule, addAvailabilityException } =
+    useBookingStore.getState();
 
   // 周一到周五：08:00 - 22:00（更长的工作时间）
   for (let day = 1; day <= 5; day++) {
@@ -88,7 +90,8 @@ export function setupComputerLab2Schedule() {
  * 为 Conference Room A 设置工作时间
  */
 export function setupConferenceRoomASchedule() {
-  const { addAvailabilityRule, addAvailabilityException } = useBookingStore.getState();
+  const { addAvailabilityRule, addAvailabilityException } =
+    useBookingStore.getState();
 
   // 周一到周五：09:00 - 17:00（办公时间）
   for (let day = 1; day <= 5; day++) {
@@ -205,11 +208,11 @@ export function testAvailabilityChecks() {
 export function initializeBookingRules() {
   // 检查是否已经初始化
   const { availabilityRules } = useBookingStore.getState();
-  
+
   if (availabilityRules.length === 0) {
     console.log("Initializing booking rules...");
     setupAllResourceSchedules();
-    
+
     // 如果需要测试，取消注释下面这行
     // testAvailabilityChecks();
   } else {
