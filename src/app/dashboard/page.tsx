@@ -151,7 +151,7 @@ export default function DashboardPage() {
                               onClick={() => handleEditBooking(booking)}
                               variant="outline"
                               size="sm"
-                              disabled={booking.status === "Cancelled"}
+                              disabled={booking.status === "Cancelled" || booking.status === "Confirmed"}
                               className="bg-[#3498db] text-white hover:bg-[#2980b9] hover:text-white disabled:opacity-50"
                               title="Edit booking"
                             >
