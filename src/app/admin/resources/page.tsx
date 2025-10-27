@@ -110,21 +110,25 @@ export default function ResourceManagementPage() {
     <div className="flex-1">
       {/* Header */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" onClick={handleBack} size="sm">
+        <div className="flex md:flex-row flex-col justify-between md:items-center h-16 gap-4">
+          <h1 className="text-2xl font-bold">Resource Management</h1>
+          <div className="flex-1 flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              className="md:flex-0 flex-1"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
-            <h1 className="text-2xl font-bold">Resource Management</h1>
+            <Button
+              onClick={handleAddResource}
+              className="dark:bg-accent-foreground dark:hover:bg-foreground/70 md:flex-0 flex-1"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Resource
+            </Button>
           </div>
-          <Button
-            onClick={handleAddResource}
-            className="bg-[#004080] hover:bg-[#003060] dark:bg-accent-foreground dark:hover:bg-foreground/70"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add New Resource
-          </Button>
         </div>
       </div>
 
