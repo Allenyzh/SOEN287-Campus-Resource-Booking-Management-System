@@ -45,7 +45,7 @@ export default function BookingManagementPage() {
       Cancelled: "bg-red-600",
     };
     return (
-      <Badge 
+      <Badge
         variant={variants[status] || "default"}
         className={colors[status] || ""}
       >
@@ -57,19 +57,13 @@ export default function BookingManagementPage() {
   return (
     <div className="flex-1">
       {/* Header */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              size="sm"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
-            <h1 className="text-2xl font-bold">Booking Management</h1>
-          </div>
+      <div className="max-w-6xl mx-auto p-4 sm:px-6 lg:px-8">
+        <div className="flex md:flex-row flex-col justify-between md:items-center gap-4">
+          <h1 className="text-2xl font-bold">Booking Management</h1>
+          <Button variant="outline" onClick={handleBack}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
         </div>
       </div>
 
@@ -112,7 +106,9 @@ export default function BookingManagementPage() {
                                   variant="outline"
                                   size="sm"
                                   className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                  onClick={() => handleApproveBooking(booking.id)}
+                                  onClick={() =>
+                                    handleApproveBooking(booking.id)
+                                  }
                                   title="Approve booking"
                                 >
                                   <CheckCircle className="w-4 h-4 mr-1" />
@@ -122,7 +118,9 @@ export default function BookingManagementPage() {
                                   variant="outline"
                                   size="sm"
                                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  onClick={() => handleRejectBooking(booking.id)}
+                                  onClick={() =>
+                                    handleRejectBooking(booking.id)
+                                  }
                                   title="Reject booking"
                                 >
                                   <XCircle className="w-4 h-4 mr-1" />
@@ -131,10 +129,14 @@ export default function BookingManagementPage() {
                               </>
                             )}
                             {booking.status === "Confirmed" && (
-                              <span className="text-sm text-gray-500">Approved</span>
+                              <span className="text-sm text-gray-500">
+                                Approved
+                              </span>
                             )}
                             {booking.status === "Cancelled" && (
-                              <span className="text-sm text-gray-500">Cancelled</span>
+                              <span className="text-sm text-gray-500">
+                                Cancelled
+                              </span>
                             )}
                           </div>
                         </TableCell>
