@@ -17,7 +17,10 @@ interface EditBookingDialogProps {
   booking: Booking | null;
   open: boolean;
   onClose: () => void;
-  onConfirm: (bookingId: number, updates: { date: string; time: string }) => void;
+  onConfirm: (
+    bookingId: number,
+    updates: { date: string; time: string }
+  ) => void;
 }
 
 export function EditBookingDialog({
@@ -66,7 +69,8 @@ export function EditBookingDialog({
   const today = new Date().toISOString().split("T")[0];
 
   // Check if any changes were made
-  const hasChanges = booking && (date !== booking.date || timeSlot !== booking.time);
+  const hasChanges =
+    booking && (date !== booking.date || timeSlot !== booking.time);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -84,12 +88,20 @@ export function EditBookingDialog({
           {/* Resource Info */}
           <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg space-y-2">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Resource:</span>
-              <span className="text-sm font-medium">{booking?.resourceName}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Resource:
+              </span>
+              <span className="text-sm font-medium">
+                {booking?.resourceName}
+              </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Status:</span>
-              <span className="text-sm font-medium capitalize">{booking?.status}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Status:
+              </span>
+              <span className="text-sm font-medium capitalize">
+                {booking?.status}
+              </span>
             </div>
           </div>
 
@@ -99,7 +111,10 @@ export function EditBookingDialog({
               <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-yellow-800 dark:text-yellow-200">
                 <p className="font-medium">Important:</p>
-                <p>Modifying a confirmed booking may require re-approval from administrators.</p>
+                <p>
+                  Modifying a confirmed booking may require re-approval from
+                  administrators.
+                </p>
               </div>
             </div>
           )}
@@ -156,8 +171,8 @@ export function EditBookingDialog({
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleConfirm} 
+          <Button
+            onClick={handleConfirm}
             disabled={!date || !timeSlot || !hasChanges}
             className="bg-[#004080] hover:bg-[#003060]"
           >

@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Resource } from "@/stores/bookingStore";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, AlertCircle } from "lucide-react";
+import { useBookingStore } from "@/stores/bookingStore";
 
 interface BookingDialogProps {
   resource: Resource | null;
@@ -28,9 +29,61 @@ export function BookingDialog({
 }: BookingDialogProps) {
   const [date, setDate] = useState("");
   const [timeSlot, setTimeSlot] = useState("");
+  const [dateError, setDateError] = useState<string>("");
+
+  const availabilityExceptions = useBookingStore(
+    (state) => state.availabilityExceptions
+  );
+
+  // Check if a date is within an unavailable exception period
+  const checkDateAvailability = (selectedDate: string): string | null => {
+    if (!resource || !selectedDate) return null;
+
+    const exceptions = availabilityExceptions.filter(
+      (exception) =>
+        exception.resourceId === resource.id && exception.isUnavailable
+    );
+
+    for (const exception of exceptions) {
+      const selected = new Date(selectedDate);
+      const start = new Date(exception.startDate);
+      const end = new Date(exception.endDate);
+
+      // Set time to midnight for accurate date comparison
+      selected.setHours(0, 0, 0, 0);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
+      if (selected >= start && selected <= end) {
+        // Return a user-friendly message based on exception type
+        const typeMessages: Record<string, string> = {
+          maintenance: "is maintaining",
+          holiday: "a holiday",
+          special_event: "has a special event",
+          other: "is unavailable",
+        };
+        const typeMsg = typeMessages[exception.type] || "unavailable";
+        const reason = exception.reason ? ` (${exception.reason})` : "";
+        return `This Date ${typeMsg}，Can not book${reason}`;
+      }
+    }
+
+    return null;
+  };
+
+  const handleDateChange = (selectedDate: string) => {
+    setDate(selectedDate);
+    const error = checkDateAvailability(selectedDate);
+    setDateError(error || "");
+
+    // Clear time slot if date is unavailable
+    if (error) {
+      setTimeSlot("");
+    }
+  };
 
   const handleConfirm = () => {
-    if (date && timeSlot) {
+    if (date && timeSlot && !dateError) {
       onConfirm({ date, time: timeSlot });
       setDate("");
       setTimeSlot("");
@@ -89,9 +142,19 @@ export function BookingDialog({
               type="date"
               value={date}
               min={today}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#004080]"
+              onChange={(e) => handleDateChange(e.target.value)}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                dateError
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-[#004080]"
+              }`}
             />
+            {dateError && (
+              <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-700">{dateError}</p>
+              </div>
+            )}
           </div>
 
           {/* Time Slot Selection */}
@@ -122,7 +185,10 @@ export function BookingDialog({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleConfirm} disabled={!date || !timeSlot}>
+          <Button
+            onClick={handleConfirm}
+            disabled={!date || !timeSlot || !!dateError}
+          >
             Confirm Booking
           </Button>
         </DialogFooter>
