@@ -5,7 +5,7 @@ export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); 
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [errors, setErrors] = useState({
     email: "",
@@ -68,7 +68,7 @@ export default function ForgotPasswordForm() {
   };
 
   return (
-    <div className="mx-auto max-w-md rounded-xl border bg-white p-8 shadow">
+    <div className="mx-auto max-w-md rounded-xl border  p-8 shadow">
       <h2 className="text-xl font-semibold">Reset your password</h2>
       <p className="text-muted-foreground mb-6 text-sm">
         Enter your email to receive a verification code.
@@ -91,7 +91,7 @@ export default function ForgotPasswordForm() {
 
       <button
         onClick={handleSendCode}
-        className="mb-6 w-full rounded-md bg-black px-4 py-2 text-white"
+        className="mb-6 w-full rounded-md dark:bg-white dark:text-black bg-black px-4 py-2 text-white"
       >
         Send code
       </button>
@@ -140,7 +140,7 @@ export default function ForgotPasswordForm() {
 
       <button
         onClick={handleResetPassword}
-        className="w-full rounded-md bg-black px-4 py-2 text-white"
+        className="w-full rounded-md dark:bg-white dark:text-black bg-black px-4 py-2 text-white"
       >
         Reset Password
       </button>
