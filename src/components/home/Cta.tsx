@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function Cta() {
@@ -14,8 +14,13 @@ export default function Cta() {
           our platform to efficiently manage their campus resource needs.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" variant="secondary" className="text-lg px-8 py-6">
-            Create Account
+          <Button
+            size="lg"
+            variant="secondary"
+            className="text-lg px-8 py-6"
+            asChild
+          >
+            <Link href="/create-account">Create Account</Link>
           </Button>
         </div>
       </div>
