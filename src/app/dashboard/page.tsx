@@ -59,13 +59,18 @@ export default function DashboardPage() {
     setIsEditDialogOpen(true);
   };
 
-  const handleConfirmEdit = (bookingId: number, updates: { date: string; time: string }) => {
+  const handleConfirmEdit = (
+    bookingId: number,
+    updates: { date: string; time: string }
+  ) => {
     updateBooking(bookingId, updates);
     setIsEditDialogOpen(false);
     setSelectedBooking(null);
-    
+
     // Show success message
-    alert(`Booking updated successfully!\nNew date: ${updates.date}\nNew time: ${updates.time}`);
+    alert(
+      `Booking updated successfully!\nNew date: ${updates.date}\nNew time: ${updates.time}`
+    );
   };
 
   const handleBookNewResource = () => {
@@ -151,7 +156,10 @@ export default function DashboardPage() {
                               onClick={() => handleEditBooking(booking)}
                               variant="outline"
                               size="sm"
-                              disabled={booking.status === "Cancelled" || booking.status === "Confirmed"}
+                              disabled={
+                                booking.status === "Cancelled" ||
+                                booking.status === "Confirmed"
+                              }
                               className="bg-[#3498db] text-white hover:bg-[#2980b9] hover:text-white disabled:opacity-50"
                               title="Edit booking"
                             >
@@ -177,12 +185,6 @@ export default function DashboardPage() {
             ) : (
               <div className="text-center py-8 text-gray-500">
                 <p>You don&apos;t have any bookings yet.</p>
-                <Button
-                  onClick={handleBookNewResource}
-                  className="mt-4 bg-[#004080] hover:bg-[#003060]"
-                >
-                  Book Your First Resource
-                </Button>
               </div>
             )}
           </CardContent>
