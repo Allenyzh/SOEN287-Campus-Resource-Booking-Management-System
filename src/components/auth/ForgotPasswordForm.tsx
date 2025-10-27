@@ -34,7 +34,7 @@ export default function ForgotPasswordForm() {
   };
 
   const handleResetPassword = () => {
-    let newErrors = { email: "", newPassword: "", confirmPassword: "" };
+    const newErrors = { email: "", newPassword: "", confirmPassword: "" };
 
     if (!validateEmail(email)) {
       newErrors.email = "Invalid email format.";
