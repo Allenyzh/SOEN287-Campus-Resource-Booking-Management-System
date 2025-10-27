@@ -283,7 +283,7 @@ export default function ResourceManagementPage() {
                 updateAvailabilityRule(rule);
               } else {
                 // New rule - remove temporary ID and let store assign real one
-                const { id: _id, ...ruleData } = rule;
+                const { id, ...ruleData } = rule;
                 addAvailabilityRule(ruleData);
               }
             });
@@ -319,7 +319,7 @@ export default function ResourceManagementPage() {
                 updateAvailabilityException(exception);
               } else {
                 // New exception - remove temporary ID and let store assign real one
-                const { id: _id, ...exceptionData } = exception;
+                const { id, ...exceptionData } = exception;
                 addAvailabilityException(exceptionData);
               }
             });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { useBookingStore, Resource } from "@/stores/bookingStore";
 import { ResourceCard } from "@/components/browse/ResourceCard";
 import { BookingDialog } from "@/components/browse/BookingDialog";
@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter } from "lucide-react";
 
 export default function BrowseResourcesPage() {
-  const _router = useRouter(); // Reserved for future navigation
+  // const _router = useRouter(); // Reserved for future navigation
   const { resources, addBooking } = useBookingStore();
 
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
