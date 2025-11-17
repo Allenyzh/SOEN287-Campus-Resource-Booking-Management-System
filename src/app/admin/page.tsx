@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useBookingStore } from "@/stores/bookingStore";
+import { useAuthStore } from "@/stores/authStore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
@@ -10,19 +11,21 @@ import { LayoutGrid, Calendar, BarChart3 } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { resources, bookings } = useBookingStore();
+  const { user } = useAuthStore();
+  const { resources, bookings, fetchResources, fetchBookings } =
+    useBookingStore();
 
   // Calculate statistics, reusing DashboardStats component format
   const stats = useMemo(() => {
     const totalBookings = bookings.length;
     const confirmedBookings = bookings.filter(
-      (b) => b.status === "Confirmed"
+      (b) => b.status === "confirmed"
     ).length;
     const pendingBookings = bookings.filter(
-      (b) => b.status === "Pending"
+      (b) => b.status === "pending"
     ).length;
     const upcomingBookings = bookings.filter(
-      (b) => b.status !== "Cancelled" && new Date(b.date) >= new Date()
+      (b) => b.status !== "cancelled" && new Date(b.startTime) >= new Date()
     ).length;
 
     return {
@@ -42,6 +45,19 @@ export default function AdminDashboardPage() {
     return Math.round((availableResources / resources.length) * 100);
   }, [resources.length, availableResources]);
 
+  // Check if user is admin
+  useEffect(() => {
+    if (!user) {
+      router.push("/sign-in");
+    } else if (user.role !== "admin") {
+      router.push("/dashboard");
+    } else {
+      // Fetch all data for admin
+      fetchResources();
+      fetchBookings();
+    }
+  }, [user, router, fetchResources, fetchBookings]);
+
   const handleLogout = () => {
     router.push("/sign-in");
   };
@@ -57,6 +73,10 @@ export default function AdminDashboardPage() {
   const navigateToReports = () => {
     router.push("/admin/reports");
   };
+
+  if (!user || user.role !== "admin") {
+    return null;
+  }
 
   return (
     <div className="flex-1">

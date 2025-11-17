@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useBookingStore, Resource } from "@/stores/bookingStore";
+import { Resource, ResourceCategory } from "@/stores/bookingStore";
 import { Edit, Trash2, Plus, ArrowLeft, Clock, Calendar } from "lucide-react";
 import { ResourceFormDialog } from "@/components/admin/ResourceFormDialog";
 import { WorkingHoursDialog } from "@/components/admin/WorkingHoursDialog";
@@ -21,23 +21,8 @@ import { ExceptionsDialog } from "@/components/admin/ExceptionsDialog";
 
 export default function ResourceManagementPage() {
   const router = useRouter();
-  const {
-    resources,
-    deleteResource,
-    toggleResourceAvailability,
-    addResource,
-    updateResource,
-    availabilityRules,
-    getAvailabilityRulesByResource,
-    addAvailabilityRule,
-    updateAvailabilityRule,
-    deleteAvailabilityRule,
-    availabilityExceptions,
-    getAvailabilityExceptionsByResource,
-    addAvailabilityException,
-    updateAvailabilityException,
-    deleteAvailabilityException,
-  } = useBookingStore();
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [categories, setCategories] = useState<ResourceCategory[]>([]);
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   );
@@ -49,6 +34,53 @@ export default function ResourceManagementPage() {
   const [scheduleResourceId, setScheduleResourceId] = useState<number | null>(
     null
   );
+
+  // Fetch resources and categories
+  useEffect(() => {
+    fetchResources();
+    fetchCategories();
+  }, []);
+
+  const fetchResources = async () => {
+    try {
+      const response = await fetch("/api/resources");
+      const result = await response.json();
+      if (result.success) {
+        const mappedResources: Resource[] = result.data.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description || "",
+          category: item.category?.name || "Uncategorized",
+          categoryId: item.categoryId,
+          capacity: item.capacity || 0,
+          location: item.location || "",
+          available: item.status === "available",
+          status: item.status,
+          imageUrl: item.imageUrl,
+          requiresApproval: item.requiresApproval,
+        }));
+        setResources(mappedResources);
+      }
+    } catch (error) {
+      console.error("Failed to fetch resources:", error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("/api/categories");
+      const result = await response.json();
+      console.log("Categories API response:", result);
+      if (result.success) {
+        console.log("Setting categories:", result.data);
+        setCategories(result.data);
+      } else {
+        console.error("Failed to fetch categories:", result.error);
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  };
 
   const handleBack = () => {
     router.push("/admin");
@@ -66,34 +98,103 @@ export default function ResourceManagementPage() {
     setIsDialogOpen(true);
   };
 
-  const handleDeleteResource = (resource: Resource) => {
+  const handleDeleteResource = async (resource: Resource) => {
     if (confirm(`Are you sure you want to delete ${resource.name}?`)) {
-      deleteResource(resource.id);
+      try {
+        const response = await fetch(`/api/resources/${resource.id}`, {
+          method: "DELETE",
+        });
+        const result = await response.json();
+        if (result.success) {
+          await fetchResources();
+        } else {
+          alert("Failed to delete resource: " + result.error);
+        }
+      } catch (error) {
+        console.error("Error deleting resource:", error);
+        alert("Failed to delete resource");
+      }
     }
   };
 
-  const handleToggleAvailability = (resource: Resource) => {
-    toggleResourceAvailability(resource.id);
+  const handleToggleAvailability = async (resource: Resource) => {
+    try {
+      const newStatus =
+        resource.status === "available" ? "unavailable" : "available";
+      const response = await fetch(`/api/resources/${resource.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const result = await response.json();
+      if (result.success) {
+        await fetchResources();
+      } else {
+        alert("Failed to update resource: " + result.error);
+      }
+    } catch (error) {
+      console.error("Error updating resource:", error);
+      alert("Failed to update resource");
+    }
   };
 
-  const handleConfirmResource = (
+  const handleConfirmResource = async (
     resourceData: Omit<Resource, "id" | "available">
   ) => {
-    if (dialogMode === "create") {
-      // When creating, add the available property (default to true)
-      addResource({
-        ...resourceData,
-        available: true,
-      });
-    } else if (selectedResource) {
-      updateResource({
-        ...resourceData,
-        id: selectedResource.id,
-        available: selectedResource.available,
-      });
+    try {
+      // Find categoryId from category name
+      const selectedCategory = categories.find(
+        (c) => c.name === resourceData.category
+      );
+      if (!selectedCategory) {
+        alert("Invalid category selected");
+        return;
+      }
+
+      // Map frontend fields to backend fields
+      const apiData = {
+        name: resourceData.name,
+        description: resourceData.description,
+        categoryId: selectedCategory.id,
+        location: resourceData.location,
+        capacity: resourceData.capacity,
+        imageUrl: resourceData.imageUrl,
+        requiresApproval: resourceData.requiresApproval || false,
+      };
+
+      if (dialogMode === "create") {
+        const response = await fetch("/api/resources", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(apiData),
+        });
+        const result = await response.json();
+        if (result.success) {
+          await fetchResources();
+          setIsDialogOpen(false);
+          setSelectedResource(null);
+        } else {
+          alert("Failed to create resource: " + result.error);
+        }
+      } else if (selectedResource) {
+        const response = await fetch(`/api/resources/${selectedResource.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(apiData),
+        });
+        const result = await response.json();
+        if (result.success) {
+          await fetchResources();
+          setIsDialogOpen(false);
+          setSelectedResource(null);
+        } else {
+          alert("Failed to update resource: " + result.error);
+        }
+      }
+    } catch (error) {
+      console.error("Error saving resource:", error);
+      alert("Failed to save resource");
     }
-    setIsDialogOpen(false);
-    setSelectedResource(null);
   };
 
   const handleSetWorkingHours = (resourceId: number) => {
@@ -178,12 +279,13 @@ export default function ResourceManagementPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
+                          {/* TODO: Implement working hours and exceptions functionality */}
                           <div className="flex space-x-2">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleSetWorkingHours(resource.id)}
-                              title="Set working hours"
+                              disabled
+                              title="Working hours feature coming soon"
                             >
                               <Clock className="w-4 h-4 mr-1" />
                               Hours
@@ -191,8 +293,8 @@ export default function ResourceManagementPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleSetExceptions(resource.id)}
-                              title="Set exceptions and blackout dates"
+                              disabled
+                              title="Exceptions feature coming soon"
                             >
                               <Calendar className="w-4 h-4 mr-1" />
                               Exceptions
@@ -259,77 +361,10 @@ export default function ResourceManagementPage() {
           setSelectedResource(null);
         }}
         onConfirm={handleConfirmResource}
+        categories={categories}
       />
 
-      {/* Working Hours Dialog */}
-      {scheduleResourceId !== null && (
-        <WorkingHoursDialog
-          resource={resources.find((r) => r.id === scheduleResourceId) || null}
-          open={isWorkingHoursDialogOpen}
-          onClose={() => {
-            setIsWorkingHoursDialogOpen(false);
-            setScheduleResourceId(null);
-          }}
-          existingRules={getAvailabilityRulesByResource(scheduleResourceId)}
-          onSave={(rules, deletedIds) => {
-            // Delete removed rules
-            deletedIds.forEach((id) => {
-              deleteAvailabilityRule(id);
-            });
-
-            // Add or update rules
-            rules.forEach((rule) => {
-              // Check if this is a new rule (temporary ID from Date.now()) or existing
-              const existingRule = availabilityRules.find(
-                (r) => r.id === rule.id
-              );
-              if (existingRule) {
-                updateAvailabilityRule(rule);
-              } else {
-                // New rule - remove temporary ID and let store assign real one
-                const { id, ...ruleData } = rule;
-                addAvailabilityRule(ruleData);
-              }
-            });
-          }}
-        />
-      )}
-
-      {/* Exceptions Dialog */}
-      {scheduleResourceId !== null && (
-        <ExceptionsDialog
-          resource={resources.find((r) => r.id === scheduleResourceId) || null}
-          open={isExceptionsDialogOpen}
-          onClose={() => {
-            setIsExceptionsDialogOpen(false);
-            setScheduleResourceId(null);
-          }}
-          existingExceptions={getAvailabilityExceptionsByResource(
-            scheduleResourceId
-          )}
-          onSave={(exceptions, deletedIds) => {
-            // Delete removed exceptions
-            deletedIds.forEach((id) => {
-              deleteAvailabilityException(id);
-            });
-
-            // Add or update exceptions
-            exceptions.forEach((exception) => {
-              // Check if this is a new exception (temporary ID from Date.now()) or existing
-              const existingException = availabilityExceptions.find(
-                (e) => e.id === exception.id
-              );
-              if (existingException) {
-                updateAvailabilityException(exception);
-              } else {
-                // New exception - remove temporary ID and let store assign real one
-                const { id, ...exceptionData } = exception;
-                addAvailabilityException(exceptionData);
-              }
-            });
-          }}
-        />
-      )}
+      {/* TODO: Implement Working Hours and Exceptions dialogs */}
     </div>
   );
 }

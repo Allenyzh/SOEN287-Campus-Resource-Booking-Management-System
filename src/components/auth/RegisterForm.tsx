@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,27 +11,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
 
 type RegisterFormProps = {
   className?: string;
-  onSubmit?: (data: {
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }) => void | Promise<void>;
 };
 
-export default function RegisterForm({
-  className,
-  onSubmit,
-}: RegisterFormProps) {
+export default function RegisterForm({ className }: RegisterFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { register, isLoading } = useAuthStore();
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -50,14 +45,14 @@ export default function RegisterForm({
     }
 
     try {
-      setIsSubmitting(true);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      await onSubmit?.({ name, email, password, confirmPassword });
-      alert("Registration successful! You can now log in.");
+      await register(name, email, password);
+      router.push("/dashboard");
     } catch (err) {
-      setError(err + "Registration failed. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Registration failed. Please try again."
+      );
     }
   }
 
@@ -139,8 +134,8 @@ export default function RegisterForm({
             </p>
           )}
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Creating account..." : "Create account"}
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? "Creating account..." : "Create account"}
           </Button>
         </form>
       </CardContent>

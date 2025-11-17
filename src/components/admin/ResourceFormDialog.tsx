@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Resource } from "@/stores/bookingStore";
+import { Resource, ResourceCategory } from "@/stores/bookingStore";
 import { Building2, Users, MapPin, Tag } from "lucide-react";
 
 interface ResourceFormDialogProps {
@@ -18,6 +18,7 @@ interface ResourceFormDialogProps {
   open: boolean;
   onClose: () => void;
   onConfirm: (resourceData: Omit<Resource, "id" | "available">) => void;
+  categories: ResourceCategory[];
 }
 
 export function ResourceFormDialog({
@@ -25,6 +26,7 @@ export function ResourceFormDialog({
   open,
   onClose,
   onConfirm,
+  categories,
 }: ResourceFormDialogProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -36,16 +38,10 @@ export function ResourceFormDialog({
 
   const isEditMode = resource !== null;
 
-  // Predefined resource categories
-  const categories = [
-    "Study Room",
-    "Computer Lab",
-    "Conference Room",
-    "Laboratory",
-    "Sports Facility",
-    "Equipment",
-    "Other",
-  ];
+  // Debug: Log categories when they change
+  useEffect(() => {
+    console.log("ResourceFormDialog categories:", categories);
+  }, [categories]);
 
   // When dialog opens in edit mode, populate form with existing data
   useEffect(() => {
@@ -109,7 +105,7 @@ export function ResourceFormDialog({
       category,
       location: location.trim(),
       capacity: Number(capacity),
-      image: image.trim() || undefined,
+      imageUrl: image.trim() || undefined,
     };
 
     onConfirm(resourceData);
@@ -129,11 +125,14 @@ export function ResourceFormDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        handleClose();
-      }
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          handleClose();
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">
@@ -195,8 +194,8 @@ export function ResourceFormDialog({
             >
               <option value="">Select a category</option>
               {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
                 </option>
               ))}
             </select>
@@ -264,7 +263,10 @@ export function ResourceFormDialog({
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
-          <Button onClick={handleConfirm} className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            onClick={handleConfirm}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             {isEditMode ? "Update Resource" : "Create Resource"}
           </Button>
         </DialogFooter>
