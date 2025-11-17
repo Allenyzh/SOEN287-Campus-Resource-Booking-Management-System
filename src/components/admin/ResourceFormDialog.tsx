@@ -242,7 +242,7 @@ export function ResourceFormDialog({
           </div>
 
           {/* Image URL (Optional) */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <label className="text-sm font-medium">
               Image URL <span className="text-gray-400">(Optional)</span>
             </label>
@@ -256,7 +256,7 @@ export function ResourceFormDialog({
             <p className="text-xs text-gray-500">
               Enter a URL to an image of the resource
             </p>
-          </div>
+          </div> */}
         </div>
 
         <DialogFooter className="gap-2">
