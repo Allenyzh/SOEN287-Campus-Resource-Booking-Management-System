@@ -51,7 +51,7 @@ export function ResourceFormDialog({
       setCategory(resource.category);
       setLocation(resource.location);
       setCapacity(resource.capacity.toString());
-      setImage(resource.image || "");
+      // setImage(resource.image || "");
       setErrors({});
     } else if (open && !resource) {
       // Create mode: clear all form fields
