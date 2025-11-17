@@ -1,0 +1,5 @@
+const r=require("express").Router();const bcrypt=require("bcryptjs");const jwt=require("jsonwebtoken");const User=require("../models/User");const {auth,requireAdmin}=require("../middleware/auth");
+r.post("/register",async(req,res)=>{const{ name,email,password}=req.body;const ex=await User.findOne({email});if(ex)return res.status(400).json({msg:"Email used"});const h=await bcrypt.hash(password,10);const u=await User.create({name,email,passwordHash:h});const t=jwt.sign({id:u._id},process.env.JWT_SECRET);res.json({token:t,user:u});});
+r.post("/login",async(req,res)=>{const{email,password}=req.body;const u=await User.findOne({email});if(!u)return res.status(400).json({msg:"Invalid"});const ok=await bcrypt.compare(password,u.passwordHash);if(!ok)return res.status(400).json({msg:"Invalid"});const t=jwt.sign({id:u._id},process.env.JWT_SECRET);res.json({token:t,user:u});});
+r.get("/me",auth,(req,res)=>res.json(req.user));
+module.exports=r;
