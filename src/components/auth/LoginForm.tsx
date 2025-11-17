@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,20 +13,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
 
 type LoginFormProps = {
   className?: string;
-  onSubmit?: (data: {
-    email: string;
-    password: string;
-  }) => void | Promise<void>;
 };
 
-export default function LoginForm({ className, onSubmit }: LoginFormProps) {
+export default function LoginForm({ className }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { login, isLoading } = useAuthStore();
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,14 +37,12 @@ export default function LoginForm({ className, onSubmit }: LoginFormProps) {
     }
 
     try {
-      setIsSubmitting(true);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      await onSubmit?.({ email, password });
-      alert("Login successful!");
+      await login(email, password);
+      router.push("/dashboard");
     } catch (err) {
-      setError(err + "Login failed. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      setError(
+        err instanceof Error ? err.message : "Login failed. Please try again."
+      );
     }
   }
 
@@ -102,8 +100,8 @@ export default function LoginForm({ className, onSubmit }: LoginFormProps) {
             </p>
           )}
 
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Signing in..." : "Sign in"}
+          <Button type="submit" disabled={isLoading} className="w-full">
+            {isLoading ? "Signing in..." : "Sign in"}
           </Button>
         </form>
       </CardContent>

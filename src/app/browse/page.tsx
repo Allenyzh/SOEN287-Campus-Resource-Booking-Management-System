@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
-// import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useBookingStore, Resource } from "@/stores/bookingStore";
+import { useAuthStore } from "@/stores/authStore";
 import { ResourceCard } from "@/components/browse/ResourceCard";
 import { BookingDialog } from "@/components/browse/BookingDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,8 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Filter } from "lucide-react";
 
 export default function BrowseResourcesPage() {
-  // const _router = useRouter(); // Reserved for future navigation
-  const { resources, addBooking } = useBookingStore();
+  const router = useRouter();
+  const { resources, fetchResources, createBooking, isLoading } =
+    useBookingStore();
+  const { user } = useAuthStore();
 
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
@@ -20,6 +23,12 @@ export default function BrowseResourcesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [bookingError, setBookingError] = useState<string | null>(null);
+
+  // Fetch resources on mount
+  useEffect(() => {
+    fetchResources();
+  }, [fetchResources]);
 
   // Get all unique categories from resources
   const categories = useMemo(() => {
@@ -42,37 +51,55 @@ export default function BrowseResourcesPage() {
   }, [resources, searchQuery, selectedCategory]);
 
   const handleBookResource = (resource: Resource) => {
+    if (!user) {
+      router.push("/sign-in");
+      return;
+    }
     setSelectedResource(resource);
     setIsDialogOpen(true);
+    setBookingError(null);
   };
 
-  const handleConfirmBooking = (bookingDetails: {
+  const handleConfirmBooking = async (bookingDetails: {
     date: string;
     time: string;
   }) => {
-    if (!selectedResource) return;
+    if (!selectedResource || !user) return;
 
-    addBooking({
-      resourceId: selectedResource.id,
-      resourceName: selectedResource.name,
-      date: bookingDetails.date,
-      time: bookingDetails.time,
-      status: "Pending",
-      userName: "Student", // In production, this should come from user authentication
-    });
+    try {
+      // Convert date and time to ISO format
+      const [hours, minutes] = bookingDetails.time.split(":");
+      const startTime = new Date(bookingDetails.date);
+      startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-    // TODO: Add toast notification for better UX
-    alert(
-      `Successfully booked ${selectedResource.name} for ${bookingDetails.date} at ${bookingDetails.time}`
-    );
+      // Assume 1 hour booking duration by default
+      const endTime = new Date(startTime);
+      endTime.setHours(endTime.getHours() + 1);
 
-    setIsDialogOpen(false);
-    setSelectedResource(null);
+      await createBooking({
+        userId: user.id,
+        resourceId: selectedResource.id,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        purpose: `Booking for ${selectedResource.name}`,
+      });
+
+      alert(
+        `Successfully booked ${selectedResource.name} for ${bookingDetails.date} at ${bookingDetails.time}`
+      );
+
+      setIsDialogOpen(false);
+      setSelectedResource(null);
+    } catch (error) {
+      setBookingError(
+        error instanceof Error ? error.message : "Failed to create booking"
+      );
+    }
   };
 
-  // const handleViewBookings = () => {
-  //   router.push("/dashboard");
-  // };
+  const handleViewBookings = () => {
+    router.push("/dashboard");
+  };
 
   return (
     <div className="flex-1 ">
@@ -195,10 +222,18 @@ export default function BrowseResourcesPage() {
       </main>
 
       {/* Booking Dialog */}
+      {bookingError && (
+        <div className="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg">
+          {bookingError}
+        </div>
+      )}
       <BookingDialog
         resource={selectedResource}
         open={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
+        onClose={() => {
+          setIsDialogOpen(false);
+          setBookingError(null);
+        }}
         onConfirm={handleConfirmBooking}
       />
     </div>

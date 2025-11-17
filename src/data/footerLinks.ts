@@ -20,7 +20,7 @@ export const footerSections: FooterLinkSection[] = [
     title: "For Administrators",
     links: [
       { href: "/admin", label: "Admin Dashboard" },
-      { href: "/admin/resources", label: "Manage Resources" },
+      // { href: "/admin/resources", label: "Manage Resources" },
     ],
   },
 ];

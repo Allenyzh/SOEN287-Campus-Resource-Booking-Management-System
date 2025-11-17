@@ -1,328 +1,325 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 export interface Resource {
   id: number;
   name: string;
   description: string;
   category: string;
+  categoryId?: number;
   capacity: number;
   location: string;
   available: boolean;
-  image?: string;
+  status?: "available" | "unavailable";
+  imageUrl?: string;
+  requiresApproval?: boolean;
 }
 
 export interface Booking {
   id: number;
   resourceId: number;
   resourceName: string;
-  date: string;
-  time: string;
-  status: "Confirmed" | "Pending" | "Cancelled";
-  userName: string;
+  userId: number;
+  userName?: string;
+  startTime: string;
+  endTime: string;
+  purpose?: string;
+  status: "pending" | "confirmed" | "cancelled" | "rejected";
+  createdAt?: string;
 }
 
-export interface AvailabilityRule {
+export interface ResourceCategory {
   id: number;
-  resourceId: number;
-  dayOfWeek: number; // 0=Sunday, 1=Monday, ..., 6=Saturday
-  openTime: string; // "HH:mm" format, e.g., "08:00"
-  closeTime: string; // "HH:mm" format, e.g., "20:00"
-}
-
-export interface AvailabilityException {
-  id: number;
-  resourceId: number;
-  startDate: string; // "YYYY-MM-DD" format
-  endDate: string; // "YYYY-MM-DD" format
-  isUnavailable: boolean; // true = blocked/unavailable, false = special availability
-  reason?: string; // Optional reason/description
-  type: "holiday" | "maintenance" | "special_event" | "other";
+  name: string;
+  description?: string;
 }
 
 interface BookingStore {
   resources: Resource[];
   bookings: Booking[];
-  availabilityRules: AvailabilityRule[];
-  availabilityExceptions: AvailabilityException[];
+  categories: ResourceCategory[];
+  isLoading: boolean;
+
+  // Fetch data from API
+  fetchResources: () => Promise<void>;
+  fetchBookings: (userId?: number) => Promise<void>;
+  fetchCategories: () => Promise<void>;
 
   // User booking functions
-  addBooking: (booking: Omit<Booking, "id">) => void;
-  updateBooking: (id: number, updates: { date: string; time: string }) => void;
-  cancelBooking: (id: number) => void;
-  updateBookingStatus: (id: number, status: Booking["status"]) => void;
-  getBookingsByResource: (resourceId: number) => Booking[];
-  getUserBookings: (userName: string) => Booking[];
+  createBooking: (booking: {
+    userId: number;
+    resourceId: number;
+    startTime: string;
+    endTime: string;
+    purpose?: string;
+  }) => Promise<void>;
+  updateBooking: (
+    id: number,
+    updates: { startTime?: string; endTime?: string; purpose?: string }
+  ) => Promise<void>;
+  cancelBooking: (id: number) => Promise<void>;
 
-  // Admin resource management functions
-  addResource: (resource: Omit<Resource, "id">) => void;
-  updateResource: (resource: Resource) => void;
-  deleteResource: (id: number) => void;
-  toggleResourceAvailability: (id: number) => void;
-
-  // Availability rules management
-  addAvailabilityRule: (rule: Omit<AvailabilityRule, "id">) => void;
-  updateAvailabilityRule: (rule: AvailabilityRule) => void;
-  deleteAvailabilityRule: (id: number) => void;
-  getAvailabilityRulesByResource: (resourceId: number) => AvailabilityRule[];
-
-  // Availability exceptions management
-  addAvailabilityException: (
-    exception: Omit<AvailabilityException, "id">
-  ) => void;
-  updateAvailabilityException: (exception: AvailabilityException) => void;
-  deleteAvailabilityException: (id: number) => void;
-  getAvailabilityExceptionsByResource: (
-    resourceId: number
-  ) => AvailabilityException[];
+  // Admin functions
+  createResource: (resource: Omit<Resource, "id">) => Promise<void>;
+  updateResource: (id: number, updates: Partial<Resource>) => Promise<void>;
+  deleteResource: (id: number) => Promise<void>;
+  approveBooking: (id: number) => Promise<void>;
+  rejectBooking: (id: number, reason?: string) => Promise<void>;
 }
 
-// Mock resource data
-const mockResources: Resource[] = [
-  {
-    id: 1,
-    name: "Study Room 101",
-    description: "Quiet study room with whiteboard and projector",
-    category: "Study Room",
-    capacity: 8,
-    location: "Library Building, Floor 1",
-    available: true,
-  },
-  {
-    id: 2,
-    name: "Computer Lab 2",
-    description: "Lab with 30 high-performance computers",
-    category: "Computer Lab",
-    capacity: 30,
-    location: "Engineering Building, Floor 2",
-    available: true,
-  },
-  {
-    id: 3,
-    name: "Conference Room A",
-    description: "Large conference room with video conferencing equipment",
-    category: "Conference Room",
-    capacity: 20,
-    location: "Administration Building, Floor 3",
-    available: true,
-  },
-  {
-    id: 4,
-    name: "Study Room 205",
-    description: "Small group study room with comfortable seating",
-    category: "Study Room",
-    capacity: 6,
-    location: "Library Building, Floor 2",
-    available: true,
-  },
-  {
-    id: 5,
-    name: "Media Lab",
-    description: "Multimedia production lab with editing equipment",
-    category: "Computer Lab",
-    capacity: 15,
-    location: "Arts Building, Floor 1",
-    available: false,
-  },
-  {
-    id: 6,
-    name: "Presentation Room B",
-    description: "Professional presentation room with smart board",
-    category: "Conference Room",
-    capacity: 12,
-    location: "Business Building, Floor 2",
-    available: true,
-  },
-  {
-    id: 7,
-    name: "Group Study Space 3",
-    description: "Open collaborative space with movable furniture",
-    category: "Study Room",
-    capacity: 10,
-    location: "Library Building, Floor 3",
-    available: true,
-  },
-  {
-    id: 8,
-    name: "VR Lab",
-    description: "Virtual reality lab with latest VR equipment",
-    category: "Computer Lab",
-    capacity: 8,
-    location: "Engineering Building, Floor 4",
-    available: true,
-  },
-];
+export const useBookingStore = create<BookingStore>((set, get) => ({
+  resources: [],
+  bookings: [],
+  categories: [],
+  isLoading: false,
 
-const mockBookings: Booking[] = [];
+  fetchResources: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await fetch("/api/resources");
+      const result = await response.json();
 
-export const useBookingStore = create<BookingStore>()(
-  persist(
-    (set, get) => ({
-      resources: mockResources,
-      bookings: mockBookings,
-      availabilityRules: [],
-      availabilityExceptions: [],
-
-      // User booking functions
-      addBooking: (booking) => {
-        const newBooking: Booking = {
-          ...booking,
-          id: Date.now(),
-        };
-        set((state) => ({
-          bookings: [...state.bookings, newBooking],
+      if (result.success) {
+        const resources: Resource[] = result.data.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description || "",
+          category: item.category?.name || "Uncategorized",
+          categoryId: item.categoryId,
+          capacity: item.capacity || 0,
+          location: item.location || "",
+          available: item.status === "available",
+          status: item.status,
+          imageUrl: item.imageUrl,
+          requiresApproval: item.requiresApproval,
         }));
-      },
 
-      updateBooking: (id, updates) => {
-        set((state) => ({
-          bookings: state.bookings.map((booking) =>
-            booking.id === id
-              ? { ...booking, date: updates.date, time: updates.time }
-              : booking
-          ),
-        }));
-      },
-
-      cancelBooking: (id) => {
-        set((state) => ({
-          bookings: state.bookings.map((booking) =>
-            booking.id === id
-              ? { ...booking, status: "Cancelled" as const }
-              : booking
-          ),
-        }));
-      },
-
-      updateBookingStatus: (id, status) => {
-        set((state) => ({
-          bookings: state.bookings.map((booking) =>
-            booking.id === id ? { ...booking, status } : booking
-          ),
-        }));
-      },
-
-      getBookingsByResource: (resourceId) => {
-        return get().bookings.filter(
-          (booking) => booking.resourceId === resourceId
-        );
-      },
-
-      getUserBookings: (userName) => {
-        return get().bookings.filter(
-          (booking) => booking.userName === userName
-        );
-      },
-
-      // Admin resource management functions
-      addResource: (resource) => {
-        const newResource: Resource = {
-          ...resource,
-          id: Date.now(),
-          available: true,
-        };
-        set((state) => ({
-          resources: [...state.resources, newResource],
-        }));
-      },
-
-      updateResource: (updatedResource) => {
-        set((state) => ({
-          resources: state.resources.map((resource) =>
-            resource.id === updatedResource.id ? updatedResource : resource
-          ),
-        }));
-      },
-
-      deleteResource: (id) => {
-        set((state) => ({
-          resources: state.resources.filter((resource) => resource.id !== id),
-        }));
-      },
-
-      toggleResourceAvailability: (id) => {
-        set((state) => ({
-          resources: state.resources.map((resource) =>
-            resource.id === id
-              ? { ...resource, available: !resource.available }
-              : resource
-          ),
-        }));
-      },
-
-      // Availability rules management
-      addAvailabilityRule: (rule) => {
-        const newRule: AvailabilityRule = {
-          ...rule,
-          id: Date.now(),
-        };
-        set((state) => ({
-          availabilityRules: [...state.availabilityRules, newRule],
-        }));
-      },
-
-      updateAvailabilityRule: (updatedRule) => {
-        set((state) => ({
-          availabilityRules: state.availabilityRules.map((rule) =>
-            rule.id === updatedRule.id ? updatedRule : rule
-          ),
-        }));
-      },
-
-      deleteAvailabilityRule: (id) => {
-        set((state) => ({
-          availabilityRules: state.availabilityRules.filter(
-            (rule) => rule.id !== id
-          ),
-        }));
-      },
-
-      getAvailabilityRulesByResource: (resourceId) => {
-        return get().availabilityRules.filter(
-          (rule) => rule.resourceId === resourceId
-        );
-      },
-
-      addAvailabilityException: (exception) => {
-        const newException: AvailabilityException = {
-          ...exception,
-          id: Date.now(),
-        };
-        set((state) => ({
-          availabilityExceptions: [
-            ...state.availabilityExceptions,
-            newException,
-          ],
-        }));
-      },
-
-      updateAvailabilityException: (updatedException) => {
-        set((state) => ({
-          availabilityExceptions: state.availabilityExceptions.map(
-            (exception) =>
-              exception.id === updatedException.id
-                ? updatedException
-                : exception
-          ),
-        }));
-      },
-
-      deleteAvailabilityException: (id) => {
-        set((state) => ({
-          availabilityExceptions: state.availabilityExceptions.filter(
-            (exception) => exception.id !== id
-          ),
-        }));
-      },
-
-      getAvailabilityExceptionsByResource: (resourceId) => {
-        return get().availabilityExceptions.filter(
-          (exception) => exception.resourceId === resourceId
-        );
-      },
-    }),
-    {
-      name: "booking-storage",
+        set({ resources, isLoading: false });
+      }
+    } catch (error) {
+      console.error("Failed to fetch resources:", error);
+      set({ isLoading: false });
     }
-  )
-);
+  },
+
+  fetchBookings: async (userId?: number) => {
+    set({ isLoading: true });
+    try {
+      const url = userId ? `/api/bookings?userId=${userId}` : "/api/bookings";
+      const response = await fetch(url);
+      const result = await response.json();
+
+      if (result.success) {
+        const bookings: Booking[] = result.data.map((item: any) => ({
+          id: item.id,
+          resourceId: item.resourceId,
+          resourceName: item.resource?.name || "Unknown",
+          userId: item.userId,
+          userName: item.user?.name,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          purpose: item.purpose,
+          status: item.status,
+          createdAt: item.createdAt,
+        }));
+
+        set({ bookings, isLoading: false });
+      }
+    } catch (error) {
+      console.error("Failed to fetch bookings:", error);
+      set({ isLoading: false });
+    }
+  },
+
+  fetchCategories: async () => {
+    try {
+      const response = await fetch("/api/categories");
+      const result = await response.json();
+
+      if (result.success) {
+        set({ categories: result.data });
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  },
+
+  createBooking: async (booking) => {
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(booking),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to create booking");
+      }
+
+      // Refresh bookings
+      await get().fetchBookings(booking.userId);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateBooking: async (id, updates) => {
+    try {
+      const response = await fetch(`/api/bookings/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to update booking");
+      }
+
+      // Update local state
+      set((state) => ({
+        bookings: state.bookings.map((b) =>
+          b.id === id ? { ...b, ...updates } : b
+        ),
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  cancelBooking: async (id) => {
+    try {
+      const response = await fetch(`/api/bookings/${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to cancel booking");
+      }
+
+      // Update local state
+      set((state) => ({
+        bookings: state.bookings.map((b) =>
+          b.id === id ? { ...b, status: "cancelled" as const } : b
+        ),
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  createResource: async (resource) => {
+    try {
+      const response = await fetch("/api/resources", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(resource),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to create resource");
+      }
+
+      // Refresh resources
+      await get().fetchResources();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateResource: async (id, updates) => {
+    try {
+      const response = await fetch(`/api/resources/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to update resource");
+      }
+
+      // Refresh resources
+      await get().fetchResources();
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  deleteResource: async (id) => {
+    try {
+      const response = await fetch(`/api/resources/${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to delete resource");
+      }
+
+      // Update local state
+      set((state) => ({
+        resources: state.resources.filter((r) => r.id !== id),
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  approveBooking: async (id) => {
+    try {
+      const response = await fetch(`/api/bookings/${id}/approve`, {
+        method: "POST",
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to approve booking");
+      }
+
+      // Update local state
+      set((state) => ({
+        bookings: state.bookings.map((b) =>
+          b.id === id ? { ...b, status: "confirmed" as const } : b
+        ),
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  rejectBooking: async (id, reason) => {
+    try {
+      const response = await fetch(`/api/bookings/${id}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to reject booking");
+      }
+
+      // Update local state
+      set((state) => ({
+        bookings: state.bookings.map((b) =>
+          b.id === id ? { ...b, status: "rejected" as const } : b
+        ),
+      }));
+    } catch (error) {
+      throw error;
+    }
+  },
+}));

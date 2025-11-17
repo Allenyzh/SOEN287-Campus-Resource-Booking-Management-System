@@ -106,14 +106,27 @@ export function EditBookingDialog({
           </div>
 
           {/* Warning Message */}
-          {booking?.status === "Confirmed" && (
+          {booking?.status === "pending" && (
+            <div className="flex items-start space-x-2 p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-blue-800 dark:text-blue-200">
+                <p className="font-medium">Pending Approval:</p>
+                <p>
+                  Your booking is waiting for admin approval. Any changes will
+                  keep it in pending status.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {booking?.status === "confirmed" && (
             <div className="flex items-start space-x-2 p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-yellow-800 dark:text-yellow-200">
                 <p className="font-medium">Important:</p>
                 <p>
-                  Modifying a confirmed booking may require re-approval from
-                  administrators.
+                  Modifying a confirmed booking will reset it to pending status
+                  and require re-approval from administrators.
                 </p>
               </div>
             </div>
