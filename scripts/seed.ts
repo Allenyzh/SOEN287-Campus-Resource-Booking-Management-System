@@ -14,6 +14,17 @@ async function seed() {
 
   const db = getDb();
 
+  // Clear existing data (in reverse order of dependencies)
+  console.log("Clearing existing data...");
+  await db.delete(notifications);
+  await db.delete(bookings);
+  await db.delete(availabilityExceptions);
+  await db.delete(availabilityRules);
+  await db.delete(resources);
+  await db.delete(resourceCategories);
+  await db.delete(users);
+  console.log("✓ Existing data cleared");
+
   // Seed Users
   console.log("Creating users...");
   const [admin, user1, user2] = await db
@@ -118,19 +129,69 @@ async function seed() {
   console.log("Creating availability rules...");
   await db.insert(availabilityRules).values([
     // Study Room 101 - Monday to Friday, 8am-10pm
-    { resourceId: room101.id, dayOfWeek: 1, openTime: "08:00", closeTime: "22:00" },
-    { resourceId: room101.id, dayOfWeek: 2, openTime: "08:00", closeTime: "22:00" },
-    { resourceId: room101.id, dayOfWeek: 3, openTime: "08:00", closeTime: "22:00" },
-    { resourceId: room101.id, dayOfWeek: 4, openTime: "08:00", closeTime: "22:00" },
-    { resourceId: room101.id, dayOfWeek: 5, openTime: "08:00", closeTime: "22:00" },
-    
+    {
+      resourceId: room101.id,
+      dayOfWeek: 1,
+      openTime: "08:00",
+      closeTime: "22:00",
+    },
+    {
+      resourceId: room101.id,
+      dayOfWeek: 2,
+      openTime: "08:00",
+      closeTime: "22:00",
+    },
+    {
+      resourceId: room101.id,
+      dayOfWeek: 3,
+      openTime: "08:00",
+      closeTime: "22:00",
+    },
+    {
+      resourceId: room101.id,
+      dayOfWeek: 4,
+      openTime: "08:00",
+      closeTime: "22:00",
+    },
+    {
+      resourceId: room101.id,
+      dayOfWeek: 5,
+      openTime: "08:00",
+      closeTime: "22:00",
+    },
+
     // Computer Lab 2 - Monday to Friday, 9am-6pm
-    { resourceId: lab2.id, dayOfWeek: 1, openTime: "09:00", closeTime: "18:00" },
-    { resourceId: lab2.id, dayOfWeek: 2, openTime: "09:00", closeTime: "18:00" },
-    { resourceId: lab2.id, dayOfWeek: 3, openTime: "09:00", closeTime: "18:00" },
-    { resourceId: lab2.id, dayOfWeek: 4, openTime: "09:00", closeTime: "18:00" },
-    { resourceId: lab2.id, dayOfWeek: 5, openTime: "09:00", closeTime: "18:00" },
-    
+    {
+      resourceId: lab2.id,
+      dayOfWeek: 1,
+      openTime: "09:00",
+      closeTime: "18:00",
+    },
+    {
+      resourceId: lab2.id,
+      dayOfWeek: 2,
+      openTime: "09:00",
+      closeTime: "18:00",
+    },
+    {
+      resourceId: lab2.id,
+      dayOfWeek: 3,
+      openTime: "09:00",
+      closeTime: "18:00",
+    },
+    {
+      resourceId: lab2.id,
+      dayOfWeek: 4,
+      openTime: "09:00",
+      closeTime: "18:00",
+    },
+    {
+      resourceId: lab2.id,
+      dayOfWeek: 5,
+      openTime: "09:00",
+      closeTime: "18:00",
+    },
+
     // Gymnasium - All week, 6am-11pm
     { resourceId: gym.id, dayOfWeek: 0, openTime: "06:00", closeTime: "23:00" },
     { resourceId: gym.id, dayOfWeek: 1, openTime: "06:00", closeTime: "23:00" },
@@ -148,7 +209,7 @@ async function seed() {
   const now = new Date();
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  
+
   await db.insert(bookings).values([
     {
       userId: user1.id,
