@@ -34,6 +34,10 @@ export default function ResourceManagementPage() {
   const [scheduleResourceId, setScheduleResourceId] = useState<number | null>(
     null
   );
+  const [availabilityRules, setAvailabilityRules] = useState<any[]>([]);
+  const [availabilityExceptions, setAvailabilityExceptions] = useState<any[]>(
+    []
+  );
 
   // Fetch resources and categories
   useEffect(() => {
@@ -197,14 +201,91 @@ export default function ResourceManagementPage() {
     }
   };
 
-  const handleSetWorkingHours = (resourceId: number) => {
+  const handleSetWorkingHours = async (resourceId: number) => {
     setScheduleResourceId(resourceId);
+    // Fetch existing rules for this resource
+    try {
+      const response = await fetch(
+        `/api/resources/${resourceId}/availability-rules`
+      );
+      const result = await response.json();
+      if (result.success) {
+        setAvailabilityRules(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch availability rules:", error);
+    }
     setIsWorkingHoursDialogOpen(true);
   };
 
-  const handleSetExceptions = (resourceId: number) => {
+  const handleSetExceptions = async (resourceId: number) => {
     setScheduleResourceId(resourceId);
+    // Fetch existing exceptions for this resource
+    try {
+      const response = await fetch(
+        `/api/resources/${resourceId}/availability-exceptions`
+      );
+      const result = await response.json();
+      if (result.success) {
+        setAvailabilityExceptions(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch availability exceptions:", error);
+    }
     setIsExceptionsDialogOpen(true);
+  };
+
+  const handleSaveWorkingHours = async (rules: any[], deletedIds: number[]) => {
+    if (!scheduleResourceId) return;
+
+    try {
+      const response = await fetch(
+        `/api/resources/${scheduleResourceId}/availability-rules`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rules, deletedIds }),
+        }
+      );
+      const result = await response.json();
+      if (result.success) {
+        alert("Working hours updated successfully!");
+        setIsWorkingHoursDialogOpen(false);
+      } else {
+        alert("Failed to update working hours: " + result.error);
+      }
+    } catch (error) {
+      console.error("Error saving working hours:", error);
+      alert("Failed to save working hours");
+    }
+  };
+
+  const handleSaveExceptions = async (
+    exceptions: any[],
+    deletedIds: number[]
+  ) => {
+    if (!scheduleResourceId) return;
+
+    try {
+      const response = await fetch(
+        `/api/resources/${scheduleResourceId}/availability-exceptions`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ exceptions, deletedIds }),
+        }
+      );
+      const result = await response.json();
+      if (result.success) {
+        alert("Exceptions updated successfully!");
+        setIsExceptionsDialogOpen(false);
+      } else {
+        alert("Failed to update exceptions: " + result.error);
+      }
+    } catch (error) {
+      console.error("Error saving exceptions:", error);
+      alert("Failed to save exceptions");
+    }
   };
 
   return (
@@ -279,13 +360,12 @@ export default function ResourceManagementPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {/* TODO: Implement working hours and exceptions functionality */}
                           <div className="flex space-x-2">
                             <Button
                               variant="outline"
                               size="sm"
-                              disabled
-                              title="Working hours feature coming soon"
+                              onClick={() => handleSetWorkingHours(resource.id)}
+                              title="Set working hours"
                             >
                               <Clock className="w-4 h-4 mr-1" />
                               Hours
@@ -293,8 +373,8 @@ export default function ResourceManagementPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              disabled
-                              title="Exceptions feature coming soon"
+                              onClick={() => handleSetExceptions(resource.id)}
+                              title="Set exceptions and blackout dates"
                             >
                               <Calendar className="w-4 h-4 mr-1" />
                               Exceptions
@@ -364,7 +444,33 @@ export default function ResourceManagementPage() {
         categories={categories}
       />
 
-      {/* TODO: Implement Working Hours and Exceptions dialogs */}
+      {/* Working Hours Dialog */}
+      {scheduleResourceId && (
+        <WorkingHoursDialog
+          resource={resources.find((r) => r.id === scheduleResourceId) || null}
+          open={isWorkingHoursDialogOpen}
+          onClose={() => {
+            setIsWorkingHoursDialogOpen(false);
+            setScheduleResourceId(null);
+          }}
+          existingRules={availabilityRules}
+          onSave={handleSaveWorkingHours}
+        />
+      )}
+
+      {/* Exceptions Dialog */}
+      {scheduleResourceId && (
+        <ExceptionsDialog
+          resource={resources.find((r) => r.id === scheduleResourceId) || null}
+          open={isExceptionsDialogOpen}
+          onClose={() => {
+            setIsExceptionsDialogOpen(false);
+            setScheduleResourceId(null);
+          }}
+          existingExceptions={availabilityExceptions}
+          onSave={handleSaveExceptions}
+        />
+      )}
     </div>
   );
 }

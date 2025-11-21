@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
       .select({ count: count() })
       .from(bookings)
       .where(
-        sql`${bookings.status} IN ('confirmed', 'pending') AND ${bookings.endTime} > ${new Date()}`
+        sql`${bookings.status} IN ('confirmed', 'pending') AND ${
+          bookings.endTime
+        } > ${sql`CURRENT_TIMESTAMP`}`
       );
 
     // Bookings by status

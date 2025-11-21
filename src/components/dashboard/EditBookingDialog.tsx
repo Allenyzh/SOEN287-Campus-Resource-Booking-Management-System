@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Booking } from "@/stores/bookingStore";
 import { Calendar, Clock, AlertCircle } from "lucide-react";
+import { format } from "date-fns";
 
 interface EditBookingDialogProps {
   booking: Booking | null;
@@ -66,7 +67,7 @@ export function EditBookingDialog({
   ];
 
   // Get today's date for setting minimum date in date picker
-  const today = new Date().toISOString().split("T")[0];
+  const today = format(new Date(), "yyyy-MM-dd");
 
   // Check if any changes were made
   const hasChanges =

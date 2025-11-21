@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Resource, AvailabilityException } from "@/stores/bookingStore";
 import { Calendar, AlertCircle, Trash2 } from "lucide-react";
+import { format } from "date-fns";
 
 interface ExceptionsDialogProps {
   resource: Resource | null;
@@ -24,8 +25,16 @@ interface ExceptionsDialogProps {
 
 const EXCEPTION_TYPES = [
   { value: "holiday", label: "Holiday", color: "bg-red-100 text-red-800" },
-  { value: "maintenance", label: "Maintenance", color: "bg-orange-100 text-orange-800" },
-  { value: "special_event", label: "Special Event", color: "bg-purple-100 text-purple-800" },
+  {
+    value: "maintenance",
+    label: "Maintenance",
+    color: "bg-orange-100 text-orange-800",
+  },
+  {
+    value: "special_event",
+    label: "Special Event",
+    color: "bg-purple-100 text-purple-800",
+  },
   { value: "other", label: "Other", color: "bg-gray-100 text-gray-800" },
 ];
 
@@ -41,11 +50,13 @@ export function ExceptionsDialog({
   const [endDate, setEndDate] = useState("");
   const [isUnavailable, setIsUnavailable] = useState(true);
   const [reason, setReason] = useState("");
-  const [type, setType] = useState<"holiday" | "maintenance" | "special_event" | "other">("maintenance");
+  const [type, setType] = useState<
+    "holiday" | "maintenance" | "special_event" | "other"
+  >("maintenance");
   const [deletedIds, setDeletedIds] = useState<number[]>([]);
 
   // Get today's date for minimum date validation
-  const today = new Date().toISOString().split("T")[0];
+  const today = format(new Date(), "yyyy-MM-dd");
 
   useEffect(() => {
     if (open && resource) {
@@ -85,7 +96,7 @@ export function ExceptionsDialog({
     };
 
     setExceptions([...exceptions, newException]);
-    
+
     // Reset form
     setStartDate("");
     setEndDate("");
@@ -94,8 +105,11 @@ export function ExceptionsDialog({
 
   const handleDeleteException = (exceptionId: number) => {
     // Track deleted IDs (only if it's an existing exception from the database)
-    const exceptionToDelete = exceptions.find(e => e.id === exceptionId);
-    if (exceptionToDelete && existingExceptions.some(e => e.id === exceptionId)) {
+    const exceptionToDelete = exceptions.find((e) => e.id === exceptionId);
+    if (
+      exceptionToDelete &&
+      existingExceptions.some((e) => e.id === exceptionId)
+    ) {
       setDeletedIds([...deletedIds, exceptionId]);
     }
     setExceptions(exceptions.filter((e) => e.id !== exceptionId));
@@ -108,30 +122,39 @@ export function ExceptionsDialog({
   };
 
   const getTypeLabel = (typeValue: string) => {
-    return EXCEPTION_TYPES.find((t) => t.value === typeValue)?.label || typeValue;
+    return (
+      EXCEPTION_TYPES.find((t) => t.value === typeValue)?.label || typeValue
+    );
   };
 
   const getTypeColor = (typeValue: string) => {
-    return EXCEPTION_TYPES.find((t) => t.value === typeValue)?.color || "bg-gray-100 text-gray-800";
+    return (
+      EXCEPTION_TYPES.find((t) => t.value === typeValue)?.color ||
+      "bg-gray-100 text-gray-800"
+    );
   };
 
-  const sortedExceptions = [...exceptions].sort((a, b) => 
+  const sortedExceptions = [...exceptions].sort((a, b) =>
     a.startDate.localeCompare(b.startDate)
   );
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        onClose();
-      }
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">
             Set Exceptions & Blackout Dates for {resource?.name}
           </DialogTitle>
           <DialogDescription>
-            Define holidays, maintenance periods, or special availability exceptions
+            Define holidays, maintenance periods, or special availability
+            exceptions
           </DialogDescription>
         </DialogHeader>
 
@@ -142,7 +165,7 @@ export function ExceptionsDialog({
               <Calendar className="w-4 h-4 mr-2" />
               Add Exception / Blackout Date
             </h3>
-            
+
             <div className="space-y-4">
               {/* Date Range */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -175,7 +198,15 @@ export function ExceptionsDialog({
                   <label className="text-sm font-medium">Exception Type</label>
                   <select
                     value={type}
-                    onChange={(e) => setType(e.target.value as "holiday" | "maintenance" | "special_event" | "other")}
+                    onChange={(e) =>
+                      setType(
+                        e.target.value as
+                          | "holiday"
+                          | "maintenance"
+                          | "special_event"
+                          | "other"
+                      )
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {EXCEPTION_TYPES.map((t) => (
@@ -190,7 +221,9 @@ export function ExceptionsDialog({
                   <label className="text-sm font-medium">Status</label>
                   <select
                     value={isUnavailable ? "blocked" : "available"}
-                    onChange={(e) => setIsUnavailable(e.target.value === "blocked")}
+                    onChange={(e) =>
+                      setIsUnavailable(e.target.value === "blocked")
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="blocked">Blocked (Unavailable)</option>
@@ -223,10 +256,13 @@ export function ExceptionsDialog({
           {/* Existing Exceptions */}
           <div className="space-y-2">
             <h3 className="text-sm font-semibold">Current Exceptions</h3>
-            
+
             {sortedExceptions.length === 0 ? (
               <div className="text-center py-8 text-gray-500 border rounded-lg">
-                <p>No exceptions set. Add exceptions above to block dates or set special availability.</p>
+                <p>
+                  No exceptions set. Add exceptions above to block dates or set
+                  special availability.
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -240,7 +276,11 @@ export function ExceptionsDialog({
                         <Badge className={getTypeColor(exception.type)}>
                           {getTypeLabel(exception.type)}
                         </Badge>
-                        <Badge variant={exception.isUnavailable ? "destructive" : "default"}>
+                        <Badge
+                          variant={
+                            exception.isUnavailable ? "destructive" : "default"
+                          }
+                        >
                           {exception.isUnavailable ? "Blocked" : "Available"}
                         </Badge>
                       </div>
@@ -269,8 +309,9 @@ export function ExceptionsDialog({
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 flex gap-2">
             <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-amber-800 dark:text-amber-200">
-              <strong>Important:</strong> Blocked dates will prevent any bookings during the specified period. 
-              Use this for holidays, maintenance, or temporary closures.
+              <strong>Important:</strong> Blocked dates will prevent any
+              bookings during the specified period. Use this for holidays,
+              maintenance, or temporary closures.
             </div>
           </div>
         </div>
@@ -279,7 +320,10 @@ export function ExceptionsDialog({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            onClick={handleSave}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             Save Exceptions
           </Button>
         </DialogFooter>

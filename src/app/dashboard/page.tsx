@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useBookingStore, Booking } from "@/stores/bookingStore";
 import { useAuthStore } from "@/stores/authStore";
+import { parseISO, format, set as setDateTime, isFuture } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -52,7 +53,7 @@ export default function DashboardPage() {
     ).length;
     const pending = userBookings.filter((b) => b.status === "pending").length;
     const upcoming = userBookings.filter(
-      (b) => b.status !== "cancelled" && new Date(b.startTime) >= new Date()
+      (b) => b.status !== "cancelled" && isFuture(parseISO(b.startTime))
     ).length;
 
     return { total, confirmed, pending, upcoming };
@@ -87,11 +88,20 @@ export default function DashboardPage() {
     try {
       // Convert date and time to ISO format
       const [hours, minutes] = updates.time.split(":");
-      const startTime = new Date(updates.date);
-      startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      const baseDate = parseISO(updates.date);
+      const startTime = setDateTime(baseDate, {
+        hours: parseInt(hours),
+        minutes: parseInt(minutes),
+        seconds: 0,
+        milliseconds: 0,
+      });
 
-      const endTime = new Date(startTime);
-      endTime.setHours(endTime.getHours() + 1);
+      const endTime = setDateTime(baseDate, {
+        hours: parseInt(hours) + 1,
+        minutes: parseInt(minutes),
+        seconds: 0,
+        milliseconds: 0,
+      });
 
       await updateBooking(bookingId, {
         startTime: startTime.toISOString(),
@@ -188,12 +198,9 @@ export default function DashboardPage() {
                   </TableHeader>
                   <TableBody>
                     {userBookings.map((booking) => {
-                      const startDate = new Date(booking.startTime);
-                      const date = startDate.toLocaleDateString();
-                      const time = startDate.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      });
+                      const startDate = parseISO(booking.startTime);
+                      const date = format(startDate, "yyyy-MM-dd");
+                      const time = format(startDate, "HH:mm");
 
                       return (
                         <TableRow key={booking.id}>

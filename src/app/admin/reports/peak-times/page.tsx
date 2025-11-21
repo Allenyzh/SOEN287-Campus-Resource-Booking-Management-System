@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { useBookingStore } from "@/stores/bookingStore";
 import { ArrowLeft, Clock, Calendar, TrendingUp, Flame } from "lucide-react";
+import { parseISO, getDay, compareDesc } from "date-fns";
 
 export default function PeakTimesReportPage() {
   const router = useRouter();
@@ -43,8 +44,8 @@ export default function PeakTimesReportPage() {
 
     bookings.forEach((booking) => {
       if (booking.status !== "Cancelled") {
-        const date = new Date(booking.date);
-        const dayIndex = date.getDay();
+        const date = parseISO(booking.date || booking.startTime);
+        const dayIndex = getDay(date);
         stats[dayIndex].count++;
       }
     });
@@ -132,7 +133,7 @@ export default function PeakTimesReportPage() {
       .sort((a, b) => {
         // Sort by count first, then by date
         if (b.count !== a.count) return b.count - a.count;
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
+        return compareDesc(parseISO(a.date), parseISO(b.date));
       })
       .slice(0, 10); // Top 10 busiest dates
   }, [bookings]);
@@ -385,7 +386,7 @@ export default function PeakTimesReportPage() {
                 </TableHeader>
                 <TableBody>
                   {dateStats.map((stat, index) => {
-                    const date = new Date(stat.date);
+                    const date = parseISO(stat.date);
                     const dayName = [
                       "Sunday",
                       "Monday",
@@ -394,7 +395,7 @@ export default function PeakTimesReportPage() {
                       "Thursday",
                       "Friday",
                       "Saturday",
-                    ][date.getDay()];
+                    ][getDay(date)];
                     return (
                       <TableRow key={stat.date}>
                         <TableCell className="font-medium">

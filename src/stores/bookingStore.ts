@@ -33,16 +33,38 @@ export interface ResourceCategory {
   description?: string;
 }
 
+export interface AvailabilityRule {
+  id: number;
+  resourceId: number;
+  dayOfWeek: number; // 0=Sunday, 1=Monday, ..., 6=Saturday
+  openTime: string; // Format: "HH:mm"
+  closeTime: string; // Format: "HH:mm"
+}
+
+export interface AvailabilityException {
+  id: number;
+  resourceId: number;
+  startDate: string;
+  endDate: string;
+  isUnavailable: boolean;
+  reason?: string;
+  type?: string;
+}
+
 interface BookingStore {
   resources: Resource[];
   bookings: Booking[];
   categories: ResourceCategory[];
+  availabilityExceptions: AvailabilityException[];
+  availabilityRules: AvailabilityRule[];
   isLoading: boolean;
 
   // Fetch data from API
   fetchResources: () => Promise<void>;
   fetchBookings: (userId?: number) => Promise<void>;
   fetchCategories: () => Promise<void>;
+  fetchAvailabilityExceptions: (resourceId?: number) => Promise<void>;
+  fetchAvailabilityRules: (resourceId?: number) => Promise<void>;
 
   // User booking functions
   createBooking: (booking: {
@@ -70,6 +92,8 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
   resources: [],
   bookings: [],
   categories: [],
+  availabilityExceptions: [],
+  availabilityRules: [],
   isLoading: false,
 
   fetchResources: async () => {
@@ -140,6 +164,92 @@ export const useBookingStore = create<BookingStore>((set, get) => ({
       }
     } catch (error) {
       console.error("Failed to fetch categories:", error);
+    }
+  },
+
+  fetchAvailabilityExceptions: async (resourceId?: number) => {
+    try {
+      // If resourceId is provided, fetch for specific resource, otherwise fetch all
+      if (resourceId) {
+        const response = await fetch(
+          `/api/resources/${resourceId}/availability-exceptions`
+        );
+        const result = await response.json();
+
+        if (result.success) {
+          // Update only exceptions for this resource
+          set((state) => ({
+            availabilityExceptions: [
+              ...state.availabilityExceptions.filter(
+                (e) => e.resourceId !== resourceId
+              ),
+              ...result.data,
+            ],
+          }));
+        }
+      } else {
+        // Fetch all exceptions for all resources
+        const resources = get().resources;
+        const allExceptions: AvailabilityException[] = [];
+
+        for (const resource of resources) {
+          const response = await fetch(
+            `/api/resources/${resource.id}/availability-exceptions`
+          );
+          const result = await response.json();
+
+          if (result.success) {
+            allExceptions.push(...result.data);
+          }
+        }
+
+        set({ availabilityExceptions: allExceptions });
+      }
+    } catch (error) {
+      console.error("Failed to fetch availability exceptions:", error);
+    }
+  },
+
+  fetchAvailabilityRules: async (resourceId?: number) => {
+    try {
+      // If resourceId is provided, fetch for specific resource, otherwise fetch all
+      if (resourceId) {
+        const response = await fetch(
+          `/api/resources/${resourceId}/availability-rules`
+        );
+        const result = await response.json();
+
+        if (result.success) {
+          // Update only rules for this resource
+          set((state) => ({
+            availabilityRules: [
+              ...state.availabilityRules.filter(
+                (r) => r.resourceId !== resourceId
+              ),
+              ...result.data,
+            ],
+          }));
+        }
+      } else {
+        // Fetch all rules for all resources
+        const resources = get().resources;
+        const allRules: AvailabilityRule[] = [];
+
+        for (const resource of resources) {
+          const response = await fetch(
+            `/api/resources/${resource.id}/availability-rules`
+          );
+          const result = await response.json();
+
+          if (result.success) {
+            allRules.push(...result.data);
+          }
+        }
+
+        set({ availabilityRules: allRules });
+      }
+    } catch (error) {
+      console.error("Failed to fetch availability rules:", error);
     }
   },
 

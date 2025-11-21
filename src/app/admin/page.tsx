@@ -4,6 +4,7 @@ import { useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useBookingStore } from "@/stores/bookingStore";
 import { useAuthStore } from "@/stores/authStore";
+import { parseISO, isFuture } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
@@ -25,7 +26,7 @@ export default function AdminDashboardPage() {
       (b) => b.status === "pending"
     ).length;
     const upcomingBookings = bookings.filter(
-      (b) => b.status !== "cancelled" && new Date(b.startTime) >= new Date()
+      (b) => b.status !== "cancelled" && isFuture(parseISO(b.startTime))
     ).length;
 
     return {

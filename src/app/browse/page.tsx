@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useBookingStore, Resource } from "@/stores/bookingStore";
 import { useAuthStore } from "@/stores/authStore";
+import { parseISO, set as setDateTime } from "date-fns";
 import { ResourceCard } from "@/components/browse/ResourceCard";
 import { BookingDialog } from "@/components/browse/BookingDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,14 +68,26 @@ export default function BrowseResourcesPage() {
     if (!selectedResource || !user) return;
 
     try {
-      // Convert date and time to ISO format
-      const [hours, minutes] = bookingDetails.time.split(":");
-      const startTime = new Date(bookingDetails.date);
-      startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      // Parse time range (e.g., "10:00 - 12:00")
+      const timeRange = bookingDetails.time.split(" - ");
+      const [startHours, startMinutes] = timeRange[0].split(":").map(Number);
+      const [endHours, endMinutes] = timeRange[1].split(":").map(Number);
 
-      // Assume 1 hour booking duration by default
-      const endTime = new Date(startTime);
-      endTime.setHours(endTime.getHours() + 1);
+      const baseDate = parseISO(bookingDetails.date);
+
+      const startTime = setDateTime(baseDate, {
+        hours: startHours,
+        minutes: startMinutes,
+        seconds: 0,
+        milliseconds: 0,
+      });
+
+      const endTime = setDateTime(baseDate, {
+        hours: endHours,
+        minutes: endMinutes,
+        seconds: 0,
+        milliseconds: 0,
+      });
 
       await createBooking({
         userId: user.id,

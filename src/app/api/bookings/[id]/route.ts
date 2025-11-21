@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb, getDbFromRequest } from "@/db";
+import { getDbFromRequest } from "@/db";
 import { bookings } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { parseISO } from "date-fns";
 
 // GET /api/bookings/[id] - Get booking by ID
 export async function GET(
@@ -60,13 +61,13 @@ export async function PUT(
       );
     }
 
-    // Convert date strings to Date objects if present
+    // Parse date strings to Date objects if present
     const updates: any = { ...body };
     if (updates.startTime) {
-      updates.startTime = new Date(updates.startTime);
+      updates.startTime = parseISO(updates.startTime);
     }
     if (updates.endTime) {
-      updates.endTime = new Date(updates.endTime);
+      updates.endTime = parseISO(updates.endTime);
     }
     updates.updatedAt = new Date();
 

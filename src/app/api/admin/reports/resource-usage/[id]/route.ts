@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb, getDbFromRequest } from "@/db";
 import { bookings, resources } from "@/db/schema";
 import { sql, eq } from "drizzle-orm";
+import { parseISO, differenceInHours } from "date-fns";
 
 // GET /api/admin/reports/resource-usage/[id] - Get usage report for specific resource
 export async function GET(
@@ -61,11 +62,11 @@ export async function GET(
 
     // Calculate utilization rate
     // (This is simplified - in production, you'd want to consider availability rules)
-    const totalHours = totalBookings.reduce((acc, booking) => {
-      const start = new Date(booking.startTime);
-      const end = new Date(booking.endTime);
-      const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-      return acc + hours;
+    const totalHours = allBookings.reduce((sum, booking) => {
+      const start = parseISO(booking.startTime);
+      const end = parseISO(booking.endTime);
+      const hours = differenceInHours(end, start);
+      return sum + hours;
     }, 0);
 
     return NextResponse.json({

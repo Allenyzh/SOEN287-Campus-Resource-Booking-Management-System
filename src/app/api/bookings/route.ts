@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb, getDbFromRequest } from "@/db";
 import { bookings, resources, users } from "@/db/schema";
 import { eq, and, gte, lte, or } from "drizzle-orm";
+import { parseISO } from "date-fns";
 
 // GET /api/bookings - Get all bookings (with filters)
 export async function GET(request: NextRequest) {
@@ -84,9 +85,9 @@ export async function POST(request: NextRequest) {
 
     const db = getDbFromRequest(request);
 
-    // Convert string dates to Date objects
-    const start = new Date(startTime);
-    const end = new Date(endTime);
+    // Parse ISO date strings properly
+    const start = parseISO(startTime);
+    const end = parseISO(endTime);
 
     // Check for booking conflicts
     const conflicts = await db
