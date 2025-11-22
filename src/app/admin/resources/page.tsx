@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Resource, ResourceCategory } from "@/stores/bookingStore";
 import { Edit, Trash2, Plus, ArrowLeft, Clock, Calendar } from "lucide-react";
 import { ResourceFormDialog } from "@/components/admin/ResourceFormDialog";
@@ -23,6 +24,7 @@ export default function ResourceManagementPage() {
   const router = useRouter();
   const [resources, setResources] = useState<Resource[]>([]);
   const [categories, setCategories] = useState<ResourceCategory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedResource, setSelectedResource] = useState<Resource | null>(
     null
   );
@@ -41,8 +43,12 @@ export default function ResourceManagementPage() {
 
   // Fetch resources and categories
   useEffect(() => {
-    fetchResources();
-    fetchCategories();
+    const loadData = async () => {
+      setIsLoading(true);
+      await Promise.all([fetchResources(), fetchCategories()]);
+      setIsLoading(false);
+    };
+    loadData();
   }, []);
 
   const fetchResources = async () => {
@@ -322,7 +328,29 @@ export default function ResourceManagementPage() {
             <CardTitle>All Resources ({resources.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            {resources.length > 0 ? (
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className="flex items-center space-x-4 py-1 border-b last:border-0"
+                  >
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-[200px]" />
+                      <Skeleton className="h-4 w-[150px]" />
+                    </div>
+                    <Skeleton className="h-6 w-24" />
+                    <Skeleton className="h-6 w-20" />
+                    <div className="flex gap-2">
+                      <Skeleton className="h-4 w-8 rounded" />
+                      <Skeleton className="h-4 w-8 rounded" />
+                      <Skeleton className="h-4 w-8 rounded" />
+                      <Skeleton className="h-4 w-8 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : resources.length > 0 ? (
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -418,14 +446,10 @@ export default function ResourceManagementPage() {
                 </Table>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p>No resources available.</p>
-                <Button
-                  onClick={handleAddResource}
-                  className="mt-4 bg-[#004080] hover:bg-[#003060]"
-                >
-                  Add Your First Resource
-                </Button>
+              <div className="text-center py-8 text-muted-foreground">
+                <p>
+                  No resources found. Create your first resource to get started.
+                </p>
               </div>
             )}
           </CardContent>

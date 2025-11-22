@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBookingStore } from "@/stores/bookingStore";
 import { CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import { format, parseISO } from "date-fns";
@@ -22,9 +23,15 @@ export default function BookingManagementPage() {
   const { bookings, fetchBookings, approveBooking, rejectBooking } =
     useBookingStore();
   const [isProcessing, setIsProcessing] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchBookings();
+    const loadBookings = async () => {
+      setIsLoading(true);
+      await fetchBookings();
+      setIsLoading(false);
+    };
+    loadBookings();
   }, [fetchBookings]);
 
   const handleBack = () => {
@@ -113,7 +120,28 @@ export default function BookingManagementPage() {
             <CardTitle>All Bookings ({bookings.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            {bookings.length > 0 ? (
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className="flex items-center space-x-4 py-3 border-b last:border-0"
+                  >
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-[180px]" />
+                      <Skeleton className="h-4 w-[120px]" />
+                    </div>
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-6 w-20" />
+                    <div className="flex gap-2">
+                      <Skeleton className="h-8 w-20 rounded" />
+                      <Skeleton className="h-8 w-20 rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : bookings.length > 0 ? (
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -201,8 +229,8 @@ export default function BookingManagementPage() {
                 </Table>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p>No bookings to manage.</p>
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No bookings found.</p>
               </div>
             )}
           </CardContent>

@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBookingStore } from "@/stores/bookingStore";
 import { useAuthStore } from "@/stores/authStore";
 import { parseISO, isFuture } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardStats } from "@/components/dashboard/DashboardStats";
 import { LayoutGrid, Calendar, BarChart3 } from "lucide-react";
 
@@ -15,6 +16,7 @@ export default function AdminDashboardPage() {
   const { user } = useAuthStore();
   const { resources, bookings, fetchResources, fetchBookings } =
     useBookingStore();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Calculate statistics, reusing DashboardStats component format
   const stats = useMemo(() => {
@@ -48,20 +50,22 @@ export default function AdminDashboardPage() {
 
   // Check if user is admin
   useEffect(() => {
-    if (!user) {
-      router.push("/sign-in");
-    } else if (user.role !== "admin") {
-      router.push("/dashboard");
-    } else {
-      // Fetch all data for admin
-      fetchResources();
-      fetchBookings();
-    }
-  }, [user, router, fetchResources, fetchBookings]);
+    // Wait a tick to allow zustand persist to load from localStorage
+    const timer = setTimeout(() => {
+      if (!user) {
+        router.push("/sign-in");
+      } else if (user.role !== "admin") {
+        router.push("/dashboard");
+      } else {
+        // Fetch all data for admin
+        fetchResources();
+        fetchBookings();
+        setIsCheckingAuth(false);
+      }
+    }, 100);
 
-  const handleLogout = () => {
-    router.push("/sign-in");
-  };
+    return () => clearTimeout(timer);
+  }, [user, router, fetchResources, fetchBookings]);
 
   const navigateToResources = () => {
     router.push("/admin/resources");
@@ -75,8 +79,47 @@ export default function AdminDashboardPage() {
     router.push("/admin/reports");
   };
 
-  if (!user || user.role !== "admin") {
-    return null;
+  if (isCheckingAuth || !user || user.role !== "admin") {
+    return (
+      <div className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header Skeleton */}
+          <div className="mb-8">
+            <Skeleton className="h-10 w-64 mb-2" />
+            <Skeleton className="h-6 w-96" />
+          </div>
+
+          {/* Stats Cards Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i}>
+                <CardHeader className="pb-3">
+                  <Skeleton className="h-5 w-32" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-10 w-20 mb-2" />
+                  <Skeleton className="h-4 w-24" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Action Buttons Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <Skeleton className="h-12 w-12 rounded-lg mb-4" />
+                  <Skeleton className="h-6 w-40 mb-2" />
+                  <Skeleton className="h-4 w-full mb-4" />
+                  <Skeleton className="h-10 w-full rounded-md" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -85,13 +128,6 @@ export default function AdminDashboardPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <h1 className="text-2xl font-bold">Administrator Dashboard</h1>
-          <Button
-            onClick={handleLogout}
-            variant="destructive"
-            className="bg-[#e74c3c] hover:bg-[#c0392b]"
-          >
-            Logout
-          </Button>
         </div>
       </div>
 

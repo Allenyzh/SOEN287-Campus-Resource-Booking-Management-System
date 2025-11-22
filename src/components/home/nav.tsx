@@ -140,7 +140,7 @@ export default function Nav() {
             <div className="hidden xl:block">
               <ThemeButton />
             </div>
-            <SideDrawer navItems={navItems} />
+            <SideDrawer navItems={currentNavItems} />
           </div>
         </div>
       </div>
