@@ -27,6 +27,10 @@ const navItems: NavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
   },
+  {
+    label: "Profile",
+    href: "/profile",
+  },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -46,9 +50,13 @@ const adminNavItems: NavItem[] = [
     label: "Bookings",
     href: "/admin/bookings",
   },
+  // {
+  //   label: "Reports",
+  //   href: "/admin/reports",
+  // },
   {
-    label: "Reports",
-    href: "/admin/reports",
+    label: "Profile",
+    href: "/profile",
   },
 ];
 
