@@ -3,7 +3,6 @@
 import { useMemo, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBookingStore } from "@/stores/bookingStore";
-import { useAuthStore } from "@/stores/authStore";
 import { parseISO, isFuture } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +12,9 @@ import { LayoutGrid, Calendar, BarChart3 } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
   const { resources, bookings, fetchResources, fetchBookings } =
     useBookingStore();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Calculate statistics, reusing DashboardStats component format
   const stats = useMemo(() => {
@@ -48,24 +46,14 @@ export default function AdminDashboardPage() {
     return Math.round((availableResources / resources.length) * 100);
   }, [resources.length, availableResources]);
 
-  // Check if user is admin
+  // Fetch data on mount
   useEffect(() => {
-    // Wait a tick to allow zustand persist to load from localStorage
-    const timer = setTimeout(() => {
-      if (!user) {
-        router.push("/sign-in");
-      } else if (user.role !== "admin") {
-        router.push("/dashboard");
-      } else {
-        // Fetch all data for admin
-        fetchResources();
-        fetchBookings();
-        setIsCheckingAuth(false);
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [user, router, fetchResources, fetchBookings]);
+    const loadData = async () => {
+      await Promise.all([fetchResources(), fetchBookings()]);
+      setIsLoading(false);
+    };
+    loadData();
+  }, [fetchResources, fetchBookings]);
 
   const navigateToResources = () => {
     router.push("/admin/resources");
@@ -79,7 +67,7 @@ export default function AdminDashboardPage() {
     router.push("/admin/reports");
   };
 
-  if (isCheckingAuth || !user || user.role !== "admin") {
+  if (isLoading) {
     return (
       <div className="flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
