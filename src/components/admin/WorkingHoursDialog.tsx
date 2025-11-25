@@ -58,7 +58,9 @@ export function WorkingHoursDialog({
     // Check if rule already exists for this day
     const exists = rules.some((r) => r.dayOfWeek === selectedDay);
     if (exists) {
-      alert("A rule already exists for this day. Please delete it first or use a different day.");
+      alert(
+        "A rule already exists for this day. Please delete it first or use a different day."
+      );
       return;
     }
 
@@ -81,8 +83,8 @@ export function WorkingHoursDialog({
 
   const handleDeleteRule = (ruleId: number) => {
     // Track deleted IDs (only if it's an existing rule from the database)
-    const ruleToDelete = rules.find(r => r.id === ruleId);
-    if (ruleToDelete && existingRules.some(r => r.id === ruleId)) {
+    const ruleToDelete = rules.find((r) => r.id === ruleId);
+    if (ruleToDelete && existingRules.some((r) => r.id === ruleId)) {
       setDeletedIds([...deletedIds, ruleId]);
     }
     setRules(rules.filter((r) => r.id !== ruleId));
@@ -101,11 +103,14 @@ export function WorkingHoursDialog({
   const sortedRules = [...rules].sort((a, b) => a.dayOfWeek - b.dayOfWeek);
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      if (!isOpen) {
-        onClose();
-      }
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">
@@ -123,7 +128,7 @@ export function WorkingHoursDialog({
               <Clock className="w-4 h-4 mr-2" />
               Add Working Hours
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Day</label>
@@ -133,7 +138,11 @@ export function WorkingHoursDialog({
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {DAYS_OF_WEEK.map((day) => (
-                    <option key={day.value} value={day.value}>
+                    <option
+                      key={day.value}
+                      value={day.value}
+                      className="dark:text-gray-600"
+                    >
                       {day.label}
                     </option>
                   ))}
@@ -174,10 +183,13 @@ export function WorkingHoursDialog({
           {/* Existing Rules */}
           <div className="space-y-2">
             <h3 className="text-sm font-semibold">Current Working Hours</h3>
-            
+
             {sortedRules.length === 0 ? (
               <div className="text-center py-8 text-gray-500 border rounded-lg">
-                <p>No working hours set. Add rules above to define operating hours.</p>
+                <p>
+                  No working hours set. Add rules above to define operating
+                  hours.
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -211,8 +223,9 @@ export function WorkingHoursDialog({
           {/* Info Box */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>Note:</strong> These hours define when the resource is available for booking. 
-              Bookings outside these hours will be prevented.
+              <strong>Note:</strong> These hours define when the resource is
+              available for booking. Bookings outside these hours will be
+              prevented.
             </p>
           </div>
         </div>
@@ -221,7 +234,10 @@ export function WorkingHoursDialog({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            onClick={handleSave}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
             Save Working Hours
           </Button>
         </DialogFooter>

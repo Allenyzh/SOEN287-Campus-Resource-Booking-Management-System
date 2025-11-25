@@ -210,7 +210,11 @@ export function ExceptionsDialog({
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     {EXCEPTION_TYPES.map((t) => (
-                      <option key={t.value} value={t.value}>
+                      <option
+                        key={t.value}
+                        value={t.value}
+                        className="dark:text-gray-600"
+                      >
                         {t.label}
                       </option>
                     ))}
@@ -226,8 +230,12 @@ export function ExceptionsDialog({
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="blocked">Blocked (Unavailable)</option>
-                    <option value="available">Special Availability</option>
+                    <option value="blocked" className="dark:text-gray-600">
+                      Blocked (Unavailable)
+                    </option>
+                    <option value="available" className="dark:text-gray-600">
+                      Special Availability
+                    </option>
                   </select>
                 </div>
               </div>
